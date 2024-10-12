@@ -1,6 +1,7 @@
 // src/translateService.js
 import axios from "axios";
 
+
 export const translateText = async (text, targetLanguage) => {
   try {
     const response = await axios.get(
@@ -38,6 +39,10 @@ export const formatDataForDisplay = (data, type) => {
 
   // Format each object with a label: value style and separate with new lines
   return filteredData
-    .map((item) => `${item.label} → ${item.value}`)
+    .map((item) => `${item.label} :::: ${item.value}`)
     .join("\n "); // Separate different objects with new lines
 };
+
+
+
+ 

@@ -93,7 +93,7 @@ function UserPage() {
     quranDatatranslated || "",
     "quran"
   )}`;
-  const formattedMoragaaData = `Revision Quran:\n${formatDataForDisplay(
+  const formattedMoragaaData = `Moragaa Quran:\n${formatDataForDisplay(
     MoragaaDatatranslated || "",
     "moragaa"
   )}`;
@@ -150,7 +150,7 @@ function UserPage() {
 
     // Redirect to WhatsApp using the generated link if valid
     if (sendToWhatsapp) {
-      window.open(sendToWhatsapp, "_blank");
+      window.location.href = sendToWhatsapp;
     } else {
       console.error("Failed to generate WhatsApp link.");
     }
@@ -195,7 +195,7 @@ function UserPage() {
           <div className="relative">
             {studentName && (
               <div
-                className="absolute end-0 z-10 mt-2 w-60 divide-y divide-gray-100 rounded-md border border-gray-100 bg-white shadow-lg h-[200px] overflow-y-scroll"
+                className="absolute end-0 z-10 mt-2 w-60 divide-y divide-gray-100 rounded-md border border-gray-100 bg-white shadow-lg"
                 role="menu"
               >
                 {searchResults.length > 0 ? (
@@ -203,7 +203,7 @@ function UserPage() {
                     <div key={index} className="p-2">
                       <a
                         href="#"
-                        className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 "
+                        className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700"
                         role="menuitem"
                         onClick={(e) => getstudent(e, student)}
                       >
@@ -238,7 +238,7 @@ function UserPage() {
                 <input
                   type="text"
                   placeholder="إسم المدرس"
-                  // required
+                  required
                   value={
                     displayStudent ? `${displayStudent.TeacherName || ""}` : ""
                   }
@@ -249,7 +249,7 @@ function UserPage() {
                 <input
                   type="date"
                   className="text-center inputText cursor-not-allowed "
-                  // required
+                  required
                   value={TodayDate}
                   readOnly
                   data-label="تاريخ"
@@ -258,7 +258,7 @@ function UserPage() {
                 <input
                   type="number"
                   placeholder="رقم الفصل"
-                  // required
+                  required
                   className="inputText"
                   value={
                     displayStudent ? `${displayStudent.ClassNum || ""}` : ""
@@ -354,7 +354,7 @@ function UserPage() {
                       type="text"
                       className="inputText"
                       placeholder="تسميع"
-                      data-label="recitation"
+                      data-label="تسميع قرأن اليوم"
                       ref={(el) => (quranInputs.current[0] = el)}
                     />
                   </div>
@@ -367,7 +367,7 @@ function UserPage() {
                       min={0}
                       className="inputText"
                       placeholder=" درجة الحفظ للتسميع"
-                      data-label="grade"
+                      data-label=" درجة تسميع قرأن اليوم"
                       ref={(el) => (quranInputs.current[1] = el)}
                     />
                   </div>
@@ -380,7 +380,7 @@ function UserPage() {
                       min={0}
                       className="inputText"
                       placeholder="درجة التجويد للتسميع"
-                      data-label="Tajweed"
+                      data-label="درجة تجويد قرأن اليوم"
                       ref={(el) => (quranInputs.current[2] = el)}
                     />
                   </div>
@@ -393,7 +393,7 @@ function UserPage() {
                       type="text"
                       className="inputText"
                       placeholder="حفظ الجدبد"
-                      data-label="new Quran"
+                      data-label="حفظ القرأن الجدبد"
                       ref={(el) => (quranInputs.current[3] = el)}
                     />
                   </div>
@@ -407,7 +407,7 @@ function UserPage() {
                       min={0}
                       className="inputText"
                       placeholder="درجة حفظ الجديد"
-                      data-label="grade"
+                      data-label=" درجة حفظ القرأن  الجدبد"
                       ref={(el) => (quranInputs.current[4] = el)}
                     />
                   </div>
@@ -421,7 +421,7 @@ function UserPage() {
                       min={0}
                       className="inputText"
                       placeholder="درجه تجويد الجديد"
-                      data-label="Tajweed"
+                      data-label=" درجة تجويد القرأن الجدبد"
                       ref={(el) => (quranInputs.current[5] = el)}
                     />
                   </div>
@@ -457,7 +457,7 @@ function UserPage() {
                       type="text"
                       className="inputText"
                       placeholder="قريب"
-                      data-label="Close"
+                      data-label="مراجعة القرأن القريب"
                       ref={(el) => (MorgaaInputs.current[0] = el)}
                     />
                   </div>
@@ -470,7 +470,7 @@ function UserPage() {
                       min={0}
                       className="inputText"
                       placeholder=" درجة حفظ القريب"
-                      data-label="Score"
+                      data-label="درجة حفظ القرأن القريب"
                       ref={(el) => (MorgaaInputs.current[1] = el)}
                     />
                   </div>
@@ -483,7 +483,7 @@ function UserPage() {
                       min={0}
                       className="inputText"
                       placeholder="درجة تجويد القريب"
-                      data-label="Tajweed"
+                      data-label="درجة تجويد القرأن القريب"
                       ref={(el) => (MorgaaInputs.current[2] = el)}
                     />
                   </div>
@@ -496,7 +496,7 @@ function UserPage() {
                       type="text"
                       className="inputText"
                       placeholder="بعيد"
-                      data-label="Far"
+                      data-label="القرأن البعيد"
                       ref={(el) => (MorgaaInputs.current[3] = el)}
                     />
                   </div>
@@ -510,7 +510,7 @@ function UserPage() {
                       min={0}
                       className="inputText"
                       placeholder="درجة حفظ البعيد"
-                      data-label="Score"
+                      data-label="درجة حفظ القرأن البعيد"
                       ref={(el) => (MorgaaInputs.current[4] = el)}
                     />
                   </div>
@@ -524,7 +524,7 @@ function UserPage() {
                       min={0}
                       className="inputText"
                       placeholder="درجه تجويد البعيد"
-                      data-label="Tajweed"
+                      data-label="درجة تجويد القرأن البعيد"
                       ref={(el) => (MorgaaInputs.current[5] = el)}
                     />
                   </div>
@@ -559,7 +559,7 @@ function UserPage() {
                       type="text"
                       className="inputText"
                       placeholder="سماع"
-                      data-label="Listen"
+                      data-label="سماع الواجب "
                       ref={(el) => (HomeworkInputs.current[0] = el)}
                     />
                   </div>
@@ -571,7 +571,7 @@ function UserPage() {
                       type="text"
                       className="inputText"
                       placeholder="حفظ"
-                      data-label="Memorize"
+                      data-label="حفظ الواجب "
                       ref={(el) => (HomeworkInputs.current[1] = el)}
                     />
                   </div>
@@ -583,7 +583,7 @@ function UserPage() {
                       type="text"
                       className="inputText "
                       placeholder="مراجعة"
-                      data-label="Review"
+                      data-label="مراجعة الواجب "
                       ref={(el) => (HomeworkInputs.current[2] = el)}
                     />
                   </div>
@@ -596,7 +596,7 @@ function UserPage() {
                       type="text"
                       className="inputText"
                       placeholder="سماع"
-                      data-label="Was homework completed(Hearing) y / n ? "
+                      data-label="هل فعل الواجب سماع"
                       ref={(el) => (HomeworkInputs.current[3] = el)}
                     />
                   </div>
@@ -609,7 +609,7 @@ function UserPage() {
                       type="text"
                       className="inputText"
                       placeholder="حفظ"
-                      data-label="Was homework completed(Memorization) y / n ?"
+                      data-label="هل فعل الواجب حفظ"
                       ref={(el) => (HomeworkInputs.current[4] = el)}
                     />
                   </div>
@@ -622,7 +622,7 @@ function UserPage() {
                       type="text"
                       className="inputText"
                       placeholder="مراجعة"
-                      data-label="Was homework completed(Revision)?"
+                      data-label="هل فعل الواجب مراجعة"
                       ref={(el) => (HomeworkInputs.current[5] = el)}
                     />
                   </div>
@@ -658,7 +658,7 @@ function UserPage() {
                       type="text"
                       className="inputText"
                       placeholder="أدخل الدرس"
-		      data-label=" Arabic langauge"
+                      data-label="درس اللغة العربيه"
                       ref={(el) => (IslamicStudies.current[0] = el)}
                     />
                   </div>
@@ -670,7 +670,7 @@ function UserPage() {
                       type="text"
                       className="inputText"
                       placeholder="أدخل الواجب"
-                      data-label="تكليف"
+                      data-label="تكليف اللغة العربيه"
                       ref={(el) => (IslamicStudies.current[1] = el)}
                     />
                   </div>
@@ -683,7 +683,7 @@ function UserPage() {
                       type="text"
                       className="inputText"
                       placeholder="هل فعل الواجب؟"
-                      data-label="Was homework completed(Memorization) y / n ?"
+                      data-label="هل فعل الطالب واجبه في اللغة العربية؟"
                       ref={(el) => (IslamicStudies.current[2] = el)}
                     />
                   </div>
@@ -696,7 +696,7 @@ function UserPage() {
                       type="text"
                       className="inputText"
                       placeholder="أدخل الدرس"
-                      data-label="الحديث"
+                      data-label="درس الحديث"
                       ref={(el) => (IslamicStudies.current[3] = el)}
                     />
                   </div>
@@ -709,7 +709,7 @@ function UserPage() {
                       type="text"
                       className="inputText"
                       placeholder="أدخل الواجب"
-                      data-label="Review"
+                      data-label="تكليف درس الحديث"
                       ref={(el) => (IslamicStudies.current[4] = el)}
                     />
                   </div>
@@ -722,7 +722,7 @@ function UserPage() {
                       type="text"
                       className="inputText"
                       placeholder="أدخل القيمة هنا"
-                      data-label="was Homework completed y / n"
+                      data-label="هل فعل الطالب واجبه في درس الحديث؟ "
                       ref={(el) => (IslamicStudies.current[5] = el)}
                     />
                   </div>
@@ -735,7 +735,7 @@ function UserPage() {
                       type="text"
                       className="inputText"
                       placeholder="أدخل الدرس"
-                      data-label="Aqeeda (creed)"
+                      data-label="درس العقيدة "
                       ref={(el) => (IslamicStudies.current[6] = el)}
                     />
                   </div>
@@ -748,7 +748,7 @@ function UserPage() {
                       type="text"
                       className="inputText"
                       placeholder="أدخل الواجب"
-                      data-label="Review"
+                      data-label="تكليف اليوم في درس العقيدة "
                       ref={(el) => (IslamicStudies.current[7] = el)}
                     />
                   </div>
@@ -761,7 +761,7 @@ function UserPage() {
                       type="text"
                       className="inputText"
                       placeholder="أدخل القيمة هنا"
-                      data-label="was Homework completed y / n?"
+                      data-label="هل فعل الطالب واجبه في  درس العقيدة؟"
                       ref={(el) => (IslamicStudies.current[8] = el)}
                     />
                   </div>
@@ -774,7 +774,7 @@ function UserPage() {
                       type="text"
                       className="inputText"
                       placeholder="أدخل الدرس"
-                      data-label="Duas"
+                      data-label="درس اليوم في الأدب والأذكار"
                       ref={(el) => (IslamicStudies.current[9] = el)}
                     />
                   </div>
@@ -787,7 +787,7 @@ function UserPage() {
                       type="text"
                       className="inputText"
                       placeholder="أدخل الواجب"
-                      data-label="Review"
+                      data-label="تكليف درس الأدب والذكر"
                       ref={(el) => (IslamicStudies.current[10] = el)}
                     />
                   </div>
@@ -800,7 +800,7 @@ function UserPage() {
                       type="text"
                       className="inputText"
                       placeholder="أدخل القيمة هنا"
-                      data-label="was Homework completed y / n ?"
+                      data-label="هل فعل الطالب واجبه في درس الأدب والأذكار؟"
                       ref={(el) => (IslamicStudies.current[11] = el)}
                     />
                   </div>
@@ -813,7 +813,7 @@ function UserPage() {
                       type="text"
                       className="inputText"
                       placeholder="أدخل الدرس"
-                      data-label="Tajweed poem (tuhfa)"
+                      data-label="درس اليوم في تحفة الأطفال"
                       ref={(el) => (IslamicStudies.current[12] = el)}
                     />
                   </div>
@@ -826,7 +826,7 @@ function UserPage() {
                       type="text"
                       className="inputText"
                       placeholder="أدخل الواجب"
-                      data-label="Review"
+                      data-label="تكليف اليوم في درس  تحفة الأطفال"
                       ref={(el) => (IslamicStudies.current[13] = el)}
                     />
                   </div>
@@ -839,7 +839,7 @@ function UserPage() {
                       type="text"
                       className="inputText"
                       placeholder="أدخل القيمة هنا"
-                      data-label="was Homework completed y / n?"
+                      data-label="هل فعل الطالب واجبه في درس   تحفة الأطفال"
                       ref={(el) => (IslamicStudies.current[14] = el)}
                     />
                   </div>

@@ -186,7 +186,7 @@ export default function Students() {
         <div className="mx-auto ">
           <h1 className="text-textColor text-xl font-medium py-2">Students</h1>
           <div className="bg-gray-100  p-4 rounded-lg">
-            <div className="overflow-x-auto h-[500px] ">
+            <div className="overflow-x-auto">
               {!AllStudents.length == 0 ? (
                 <table className="min-w-full  overflow-scroll bg-white border border-gray-300">
                   <thead className="bg-gray-200 text-[12px]">

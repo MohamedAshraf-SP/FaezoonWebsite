@@ -19,16 +19,27 @@ const host = process.env.HOST || 'localhost'; // Default to 'localhost' if not s
 const ORIGIN = process.env.ORIGIN;
 const dbURI = process.env.DB_URI;
 
-
+console.log(dbURI)
 const app = express();
+const corsOptions = {
+  origin: '*', // Replace with your client origin
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200,
+};
 
+app.use(cors(corsOptions));
+
+// Handle preflight requests for OPTIONS method
+app.options('*', cors(corsOptions));
 // Set CORS options
-app.use(
-  cors({
-    origin: ORIGIN, // Make sure this matches your client origin
-    optionsSuccessStatus: 200,
-  })
-);
+///app.use(
+  //cors({
+    //origin:'*',
+ // Make sure this matches your client origin
+   // optionsSuccessStatus: 200,
+ // })
+//);
 
 // Connect to the database
 try {
@@ -39,29 +50,29 @@ try {
 }
 
 // Serve static files from the 'dist' directory (production build)
-app.use(express.static(path.join(__dirname, 'alfaaizoon', 'dist'), {
-  setHeaders: function (res, filePath) {
+//app.use(express.static(path.join(__dirname, 'alfaaizoon', 'dist'), {
+  //setHeaders: function (res, filePath) {
     // Set the correct MIME type for JavaScript files
-    if (filePath.endsWith('.js')) {
-      res.set('Content-Type', 'application/javascript');
-    }
-    if (filePath.endsWith('.jsx')) {
-      res.set('Content-Type', 'application/javascript'); // JSX should be transpiled before deployment
-    }
-  }
-}));
+    //if (filePath.endsWith('.js')) {
+      //res.set('Content-Type', 'application/javascript');
+    //}
+    //if (filePath.endsWith('.jsx')) {
+      //res.set('Content-Type', 'application/javascript'); // JSX should be transpiled before deployment
+    //}
+  //}
+//}));
 
-app.use(express.static(path.join(__dirname, 'alfaaizoon', 'src'), {
-  setHeaders: function (res, filePath) {
+//app.use(express.static(path.join(__dirname, 'alfaaizoon', 'src'), {
+  //setHeaders: function (res, filePath) {
     // Set the correct MIME type for JavaScript files
-    if (filePath.endsWith('.js')) {
-      res.set('Content-Type', 'application/javascript');
-    }
-    if (filePath.endsWith('.jsx')) {
-      res.set('Content-Type', 'application/javascript'); // JSX should be transpiled before deployment
-    }
-  }
-}));
+    //if (filePath.endsWith('.js')) {
+      //res.set('Content-Type', 'application/javascript');
+    //}
+    //if (filePath.endsWith('.jsx')) {
+      //res.set('Content-Type', 'application/javascript'); // JSX should be transpiled before deployment
+    //}
+  //}
+//}));
 
 // Handle all other routes by serving the index.html (Single Page Application)
 
@@ -75,9 +86,9 @@ app.use("/api", router);
 // /api/v1/Students/Count
 
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'alfaaizoon', 'dist', 'index.html'));
-});
+//app.get('*', (req, res) => {
+  //res.sendFile(path.join(__dirname, 'alfaaizoon', 'dist', 'index.html'));
+//});
 // Start the server
 app.listen(port, host, () => {
   console.log(`Server running on Host ${host} Port ${port}...\n`);

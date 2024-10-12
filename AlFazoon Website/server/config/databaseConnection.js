@@ -8,12 +8,12 @@ import mongoose from 'mongoose';
 export async function run(uri) {
     try {
         console.log('\nConnecting to DB...\n');
-
+console.log(uri)
         // Connect to the MongoDB server
-        await mongoose.connect(uri, {
-            dbName: 'faezoonDB' // Specify the database name
-        });
-
+       await mongoose.connect(uri, {
+//    useNewUrlParser: true,
+  ////  useUnifiedTopology: true
+})
         console.log("Connected successfully to the database!\n");
 
         //const collections = await mongoose.connection.db.listCollections().toArray();

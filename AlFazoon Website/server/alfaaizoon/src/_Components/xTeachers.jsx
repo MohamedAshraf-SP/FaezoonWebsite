@@ -144,9 +144,9 @@ export default function Teachers() {
             <div className="overflow-x-auto">
               <div className="rounded-lg border border-gray-200">
                 <div className="overflow-x-auto rounded-t-lg">
-                  <div className="overflow-x-auto h-[500px]">
+                  <div className="overflow-x-auto">
                     {!AllTeachers?.length == 0 ? (
-                      <table className="min-w-full  overflow-scroll divide-y-2 divide-gray-200 bg-white text-sm">
+                      <table className="min-w-full overflow-scroll divide-y-2 divide-gray-200 bg-white text-sm">
                         <thead className="text-left text-[14px]">
                           <tr>
                             <th className="whitespace-nowrap  px-4 py-2 font-bold text-center text-textColor">
