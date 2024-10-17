@@ -1,7 +1,7 @@
 import express from "express";
 import router from "./routes/router.js";
 import cors from "cors";
-import dotenv from "dotenv";
+import dotenv from "dotenv" ;////////
 
 import { Whats } from "./controllers/whatsapp.js";
 import { run } from "./config/databaseConnection.js";
