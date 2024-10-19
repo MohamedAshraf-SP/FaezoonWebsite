@@ -1,5 +1,5 @@
 import Teacher from "./../models/teachers.js"; // Import the Teacher model
-import jwt from "jsonwebtoken";
+
 
 
 

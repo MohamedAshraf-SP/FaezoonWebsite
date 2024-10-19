@@ -1,6 +1,6 @@
-import mongoose from 'mongoose'; // Import mongoose for ObjectId validation
+
 import Student from './../models/students.js'; // Import the Student model
-import Teacher from './../models/teachers.js'; // Import the Student model
+
 
 
 // Search student by ID

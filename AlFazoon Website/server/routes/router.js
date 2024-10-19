@@ -2,6 +2,7 @@ import express from "express";
 import studentsRoute from "./students.js";
 import teachersRoute from "./teachers.js";
 import loginRoute from "./login.js";
+import tutorialsRoute from "./tutorials/tutorials.js";
 import {
   roleMiddleware,
   authMiddleware,
@@ -11,6 +12,7 @@ const router = express.Router();
 
 router.use("/v1/login", loginRoute);
 router.use("/v1", studentsRoute);
+router.use("/v1/tutorials", tutorialsRoute);
 router.use("/v1", authMiddleware, roleMiddleware("admin"), teachersRoute);
 // /v1/Students/Count
 
