@@ -14,12 +14,13 @@ import {
 
 export const studentsRoute = express.Router();
 
-studentsRoute.get("/Student/:id", getStudent);
-studentsRoute.get("/Students", getStudents);
-studentsRoute.post("/Student",  addStudent);
-studentsRoute.put("/Student/:id",  updateStudent);
-studentsRoute.delete("/Student/:id",  deleteStudent);
-studentsRoute.get("/Students/Count",  getTotalStudentCount);
+
+studentsRoute.get("/Count",  getTotalStudentCount);
+studentsRoute.get("/:id", getStudent);
+studentsRoute.get("/", getStudents);
+studentsRoute.post("/",  addStudent);
+studentsRoute.put("/:id",  updateStudent);
+studentsRoute.delete("/:id",  deleteStudent);
 
 export default studentsRoute;
 

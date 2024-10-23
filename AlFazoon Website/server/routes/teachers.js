@@ -10,13 +10,13 @@ import {
 import { authMiddleware, roleMiddleware } from "../middlewares/Middlewares.js";
 export const teachersRoute = express.Router();
 
+teachersRoute.get("/count", getTeachersCount);
+teachersRoute.get("/:id", getTeacher);
+teachersRoute.get("/", getTeachers);
+teachersRoute.post("/", addTeacher);
+teachersRoute.put("/:id", updateTeacher);
+teachersRoute.delete("/:id", deleteTeacher);
 
-teachersRoute.delete("/teacher/d/:id", deleteTeacher);
-teachersRoute.post("/teacher/:id", getTeacher);
-teachersRoute.post("/teacher", addTeacher);
-teachersRoute.post("/teachers", getTeachers);
-teachersRoute.put("/teacher/:id", updateTeacher);
-teachersRoute.post("/teachers/Count", getTeachersCount);
 
 export default teachersRoute;
 
