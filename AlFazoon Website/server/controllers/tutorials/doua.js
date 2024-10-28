@@ -35,6 +35,7 @@ export const searchDoua = async (req, res) => {
             queryConditions.push({ dID: dID });
         } else if (searchWord) {
             queryConditions.push({ arabic: { $regex: searchWord, $options: 'i' } });
+            queryConditions.push({ name: { $regex: searchWord, $options: 'i' } });
             queryConditions.push({ english: { $regex: searchWord, $options: 'i' } });
             queryConditions.push({ type: { $regex: searchWord, $options: 'i' } });
         } else {
@@ -44,7 +45,7 @@ export const searchDoua = async (req, res) => {
         // console.log(queryConditions)
 
 
-        const douas = await Doua.find({ $or: [...queryConditions] }, { dID: 1, arabic: 1, english: 1 }).limit(10)
+        const douas = await Doua.find({ $or: [...queryConditions] }, { dID: 1, name: 1, arabic: 1, english: 1 }).limit(10)
 
         if (!douas) {
             return res.status(404).json({ message: 'doua not found' });
@@ -67,6 +68,7 @@ export const getDouaById = async (req, res) => {
         res.status(200).json({
             "_id": doua._id,
             "dID": doua.dID,
+            "name": doua.name,
             "arabic": doua.arabic,
             "arabicwithoutTashkeel": doua.arabicWithoutTashkit,
             "english": doua.english,
@@ -93,7 +95,7 @@ export const getDouas = async (req, res) => {
     const pagesCount = Math.ceil(douaCount / limit) || 0
 
     try {
-        const douas = await Doua.find({}, { dID: 1, arabic: 1, english: 1, voice: 1, type: 1 }).skip(skip).limit(limit) // Skip the specified number of documents.limit(limit);;
+        const douas = await Doua.find({}, { dID: 1, name: 1, arabic: 1, english: 1, voice: 1, type: 1 }).skip(skip).limit(limit) // Skip the specified number of documents.limit(limit);;
         res.status(200).json({
             "currentPage": page,
             "pagesCount": pagesCount,
@@ -134,6 +136,7 @@ export const addDoua = async (req, res) => {
         const newDoua = new Doua({
             dID: req.body.number,
             type: req.body.type,
+            name: req.body.name,
             arabic: req.body.arabic,
             arabicWithoutTashkit: arabicWithoutTashkit,
             english: req.body.english,
@@ -201,6 +204,7 @@ export const updateDoua = async (req, res) => {
             req.params.id,
             {
                 dID: req.body.number || douaToUpdate.number,
+                name: req.body.name || douaToUpdate.name,
                 arabic: req.body.arabic || douaToUpdate.arabic,
                 arabicWithoutTashkit: arabicWithoutTashkit || douaToUpdate.arabicWithoutTashkit,
                 english: req.body.english || douaToUpdate.english,
