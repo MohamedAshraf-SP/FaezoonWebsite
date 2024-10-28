@@ -205,6 +205,7 @@ export const updateDoua = async (req, res) => {
             {
                 dID: req.body.number || douaToUpdate.number,
                 name: req.body.name || douaToUpdate.name,
+                type: req.body.type || douaToUpdate.type,
                 arabic: req.body.arabic || douaToUpdate.arabic,
                 arabicWithoutTashkit: arabicWithoutTashkit || douaToUpdate.arabicWithoutTashkit,
                 english: req.body.english || douaToUpdate.english,

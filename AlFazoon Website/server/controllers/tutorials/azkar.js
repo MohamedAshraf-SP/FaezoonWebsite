@@ -157,7 +157,7 @@ export const addAzkar = async (req, res) => {
 export const updateAzkar = async (req, res) => {
     try {
         const azkarToUpdate = await Azkar.findById(req.params.id);
-       // console.log(azkarToUpdate)
+        // console.log(azkarToUpdate)
         if (!azkarToUpdate) {
 
             deleteFileWithPath(req.file.path)
@@ -196,18 +196,19 @@ export const updateAzkar = async (req, res) => {
             voiceData = azkarToUpdate.voice
 
         }
-       // console.log(voiceData)
+        // console.log(voiceData)
 
 
 
 
-        const arabicWithoutTashkit = removeDiacritics(req.body.arabic||"")
+        const arabicWithoutTashkit = removeDiacritics(req.body.arabic || "")
 
         const updatedAzkar = await Azkar.findByIdAndUpdate(
             req.params.id,
             {
                 zID: req.body.number || azkarToUpdate.number,
                 arabic: req.body.arabic || azkarToUpdate.arabic,
+                type: req.body.type || azkarToUpdate.type,
                 arabicWithoutTashkit: arabicWithoutTashkit || azkarToUpdate.arabicWithoutTashkit,
                 english: req.body.english || azkarToUpdate.english,
                 voice: newAzkarVoice || oldVoice
