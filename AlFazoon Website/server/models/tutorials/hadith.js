@@ -14,6 +14,7 @@ export const HadithVoice = mongoose.model('HadithVoice', hadithVoiceSchema);
 const hadithSchema = new Schema({
     hID: { type: Number, required: true, unique: true },
     arabic: { type: String, required: true },
+    arabicWithoutTashkit: { type: String, required: true },
     english: { type: String, required: true },
     voice: { type: mongoose.Schema.Types.ObjectId, ref: 'HadithVoice', required: true },
     createdAt: { type: Date, default: Date.now },

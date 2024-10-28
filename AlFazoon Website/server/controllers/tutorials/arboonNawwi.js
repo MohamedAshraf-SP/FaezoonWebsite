@@ -4,6 +4,8 @@ import * as mm from 'music-metadata';
 import fs from 'fs'
 import { Console } from 'console';
 import mongoose from 'mongoose';
+import { removeDiacritics } from '../../helpers/removeDiacritics.js';
+import { deleteFileWithPath } from '../../helpers/deleteFile.js';
 
 // Search arboonNawwi in text
 export const searchArboonNawwi = async (req, res) => {
@@ -33,6 +35,7 @@ export const searchArboonNawwi = async (req, res) => {
             queryConditions.push({ nID: nID });
         } else if (searchWord) {
             queryConditions.push({ arabic: { $regex: searchWord, $options: 'i' } });
+            queryConditions.push({ arabicWithoutTashkit: { $regex: searchWord, $options: 'i' } });
             queryConditions.push({ english: { $regex: searchWord, $options: 'i' } });
         } else {
             queryConditions.push({ nothing: 0 });
@@ -41,7 +44,7 @@ export const searchArboonNawwi = async (req, res) => {
         // console.log(queryConditions)
 
 
-        const arboonNawwis = await ArboonNawwi.find({ $or: [...queryConditions] }).limit(10)
+        const arboonNawwis = await ArboonNawwi.find({ $or: [...queryConditions] }, { nID: 1, arabic: 1, english: 1 }).limit(10)
 
         if (!arboonNawwis) {
             return res.status(404).json({ message: 'arboonNawwi not found' });
@@ -65,6 +68,7 @@ export const getArboonNawwiById = async (req, res) => {
             "_id": arboonNawwi._id,
             "nID": arboonNawwi.nID,
             "arabic": arboonNawwi.arabic,
+            "arabicWithoutTashkeel": arboonNawwi.arabicWithoutTashkit,
             "english": arboonNawwi.english,
             "voice": arboonNawwi.voice,
         }
@@ -88,7 +92,7 @@ export const getArboonNawwis = async (req, res) => {
     const pagesCount = Math.ceil(arboonNawwiCount / limit) || 0
 
     try {
-        const arboonNawwis = await ArboonNawwi.find().skip(skip).limit(limit) // Skip the specified number of documents.limit(limit);;
+        const arboonNawwis = await ArboonNawwi.find({}, { nID: 1, arabic: 1, english: 1, voice: 1 }).skip(skip).limit(limit) // Skip the specified number of documents.limit(limit);;
         res.status(200).json({
             "currentPage": page,
             "pagesCount": pagesCount,
@@ -125,9 +129,12 @@ export const addArboonNawwi = async (req, res) => {
         })
         await newArboonNawwiVoice.save();
         // let cryptedPassword = req.body.password  
+
+        const arabicWithoutTashkit = removeDiacritics(req.body.arabic)
         const newArboonNawwi = new ArboonNawwi({
             nID: req.body.number,
             arabic: req.body.arabic,
+            arabicWithoutTashkit: arabicWithoutTashkit,
             english: req.body.english,
             voice: newArboonNawwiVoice
         });
@@ -135,92 +142,87 @@ export const addArboonNawwi = async (req, res) => {
         await newArboonNawwi.save();
         res.status(201).json({ message: 'arboonNawwi added successfully' });
     } catch (error) {
+        deleteFileWithPath(req.file.path)
         res.status(400).json({ error: error.message });
     }
 };
 
 
 // Update arboonNawwi by ID
-export const updateArboonNawwi = async (req, res) =>{
+export const updateArboonNawwi = async (req, res) => {
     try {
-    const arboonNawwiToUpdate = await ArboonNawwi.findById(req.params.id);
-    const oldVoice = await ArboonNawwiVoice.findById(arboonNawwiToUpdate.voice)
-    const newVoice = req.file
-    let voiceData = {}
-    let oldArboonNawwiVoicePath;
-    let newArboonNawwiVoice
-    if (!arboonNawwiToUpdate) {
+        const arboonNawwiToUpdate = await ArboonNawwi.findById(req.params.id);
 
-        fs.unlink(req.file.path, (err) => {
-            if (err) {
-                console.error('Failed to delete old voice file:', err);
-            } else {
-                console.log('ArboonNawwiVoice file deleted:', req.file.path);
-            }
-        })
+        if (!arboonNawwiToUpdate) {
 
-        return res.status(404).json({ message: 'aqidah not found' });
-    }
-
-
-
-    if (newVoice) {
-        const metadata = await mm.parseFile(newVoice.path);
-        const duration = metadata.format?.duration || 0;
-
-        oldArboonNawwiVoicePath = oldVoice.path
-        console.log(oldVoice)
-
-        voiceData = {
-            filename: req.file.filename,
-            path: req.file.path,
-            duration: duration,
-            type: req.file.mimetype,
-            size: req.file.size
+            deleteFileWithPath(req.file.path)
+            return res.status(404).json({ message: 'aqidah not found' });
         }
 
-        newArboonNawwiVoice = new ArboonNawwiVoice(voiceData)
-        await newArboonNawwiVoice.save();
-
-    } else {
-        console.log("no new", oldVoice.filename)
-
-        voiceData = arboonNawwiToUpdate.voice
-
-    }
-    console.log(voiceData)
+        const oldVoice = await ArboonNawwiVoice.findById(arboonNawwiToUpdate.voice)
+        const newVoice = req.file
+        let voiceData = {}
+        let oldArboonNawwiVoicePath;
+        let newArboonNawwiVoice
 
 
+        if (newVoice) {
+            const metadata = await mm.parseFile(newVoice.path);
+            const duration = metadata.format?.duration || 0;
 
+            oldArboonNawwiVoicePath = oldVoice.path
+            //console.log(oldVoice)
 
-
-    const updatedArboonNawwi = await ArboonNawwi.findByIdAndUpdate(
-        req.params.id,
-        {
-            aID: req.body.number,
-            arabic: req.body.arabic,
-            english: req.body.english,
-            voice: newArboonNawwiVoice || oldVoice
-        },
-        { new: true }
-    );
-
-
-    if (oldArboonNawwiVoicePath) {
-        fs.unlink(oldArboonNawwiVoicePath, (err) => {
-            if (err) {
-                console.error('Failed to delete old voice file:', err);
-            } else {
-                console.log('Old voice file deleted:', oldArboonNawwiVoicePath);
+            voiceData = {
+                filename: req.file.filename,
+                path: req.file.path,
+                duration: duration,
+                type: req.file.mimetype,
+                size: req.file.size
             }
-        });
-    }
 
-    res.status(200).json(updatedArboonNawwi);
-} catch (error) {
-    res.status(400).json({ error: error.message });
-}}
-;/* {
+
+            newArboonNawwiVoice = new ArboonNawwiVoice(voiceData)
+            await newArboonNawwiVoice.save();
+
+        } else {
+
+            voiceData = arboonNawwiToUpdate.voice
+
+        }
+      //  console.log(voiceData)
+
+
+
+        const arabicWithoutTashkit = removeDiacritics(req.body.arabic||"")
+
+        const updatedArboonNawwi = await ArboonNawwi.findByIdAndUpdate(
+            req.params.id,
+            {
+                nID: req.body.number || arboonNawwiToUpdate.number,
+                arabic: req.body.arabic || arboonNawwiToUpdate.arabic,
+                arabicWithoutTashkit: arabicWithoutTashkit || arboonNawwiToUpdate.arabicWithoutTashkit,
+                english: req.body.english || arboonNawwiToUpdate.english,
+                voice: newArboonNawwiVoice || oldVoice
+            },
+            {
+                new: true,
+                projection: { nID: 1, arabic: 1, english: 1, voice: 1 }
+            }
+        );
+
+
+        if (oldArboonNawwiVoicePath) {
+            deleteFileWithPath(oldArboonNawwiVoicePath)
+        }
+
+        res.status(200).json(updatedArboonNawwi);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+}
+    ;
+/* {
     try {
         const arboonNawwiToUpdate = await ArboonNawwi.findById(req.params.id);
         if (!arboonNawwiToUpdate) {
@@ -232,6 +234,7 @@ export const updateArboonNawwi = async (req, res) =>{
                     console.log('ArboonNawwiVoice file deleted:', req.file.path);
                 }
             })
+                nID
 
             return res.status(404).json({ message: 'arboonNawwi not found' });
         }
@@ -312,13 +315,8 @@ export const deleteArboonNawwi = async (req, res) => {
 
         // Now, safely delete the voice file from the file system
         if (voice && voice.path) {
-            fs.unlink(voice.path, (err) => {
-                if (err) {
-                    console.error('Failed to delete old voice file:', err);
-                } else {
-                    console.log('ArboonNawwiVoice file deleted:', voice.path);
-                }
-            });
+            deleteFileWithPath(voice.path)
+            
         }
 
         res.status(200).json({ message: 'ArboonNawwi and associated voice deleted successfully' });

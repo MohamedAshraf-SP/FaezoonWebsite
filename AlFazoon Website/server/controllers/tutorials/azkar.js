@@ -4,25 +4,28 @@ import * as mm from 'music-metadata';
 import fs from 'fs'
 import { Console } from 'console';
 import mongoose from 'mongoose';
+import { removeDiacritics } from '../../helpers/removeDiacritics.js';
+import { Doua } from '../../models/tutorials/doua.js';
+import { deleteFileWithPath } from '../../helpers/deleteFile.js';
 
 // Search azkar in text
 export const searchAzkar = async (req, res) => {
-  
-/* 
-        try {
-        const searchArabicWord = req.body.arabic || ""
-        const searchEnglishWord = req.body.english || ""
-        console.log(searchArabicWord, searchEnglishWord)
 
-
-        const azkars = await Azkar.find({
-            $or: [
-                {  zID: req.body.zID||-1},
-                { arabic: { $regex: searchArabicWord, $options: 'i' } }, // Case-insensitive search in Arabic
-                { english: { $regex: searchEnglishWord, $options: 'i' } }, // Case-insensitive search in English
-            ]
-        });
-*/
+    /* 
+            try {
+            const searchArabicWord = req.body.arabic || ""
+            const searchEnglishWord = req.body.english || ""
+            console.log(searchArabicWord, searchEnglishWord)
+    
+    
+            const azkars = await Azkar.find({
+                $or: [
+                    {  zID: req.body.zID||-1},
+                    { arabic: { $regex: searchArabicWord, $options: 'i' } }, // Case-insensitive search in Arabic
+                    { english: { $regex: searchEnglishWord, $options: 'i' } }, // Case-insensitive search in English
+                ]
+            });
+    */
     try {
 
         const searchWord = req.body.searchWord || "";
@@ -35,6 +38,7 @@ export const searchAzkar = async (req, res) => {
             queryConditions.push({ zID: zID });
         } else if (searchWord) {
             queryConditions.push({ arabic: { $regex: searchWord, $options: 'i' } });
+            queryConditions.push({ arabicWithoutTashkit: { $regex: searchWord, $options: 'i' } });
             queryConditions.push({ english: { $regex: searchWord, $options: 'i' } });
             queryConditions.push({ type: { $regex: searchWord, $options: 'i' } });
         } else {
@@ -44,7 +48,7 @@ export const searchAzkar = async (req, res) => {
         // console.log(queryConditions)
 
 
-        const azkars = await Azkar.find({ $or: [...queryConditions] })
+        const azkars = await Azkar.find({ $or: [...queryConditions] }, { zID: 1, arabic: 1, english: 1 }).limit(10)
 
         if (!azkars) {
             return res.status(404).json({ message: 'azkar not found' });
@@ -67,9 +71,10 @@ export const getAzkarById = async (req, res) => {
         res.status(200).json({
             "_id": azkar._id,
             "zID": azkar.zID,
-            "arabic": azkar.arabic,  
+            "arabic": azkar.arabic,
+            "arabicWithoutTashkeel": azkar.arabicWithoutTashkit,
             "english": azkar.english,
-            "type":azkar.type,
+            "type": azkar.type,
             "voice": azkar.voice,
         }
         );
@@ -92,7 +97,7 @@ export const getAzkars = async (req, res) => {
     const pagesCount = Math.ceil(azkarCount / limit) || 0
 
     try {
-        const azkars = await Azkar.find().skip(skip).limit(limit) // Skip the specified number of documents.limit(limit);;
+        const azkars = await Azkar.find({}, { zID: 1, arabic: 1, english: 1, voice: 1, type: 1 }).skip(skip).limit(limit) // Skip the specified number of documents.limit(limit);;
         res.status(200).json({
             "currentPage": page,
             "pagesCount": pagesCount,
@@ -128,11 +133,13 @@ export const addAzkar = async (req, res) => {
             size: req.file.size
         })
         await newAzkarVoice.save();
-        // let cryptedPassword = req.body.password  
+        // let cryptedPassword = req.body.password 
+        const arabicWithoutTashkit = removeDiacritics(req.body.arabic)
         const newAzkar = new Azkar({
             zID: req.body.number,
-            type:req.body.type,
+            type: req.body.type,
             arabic: req.body.arabic,
+            arabicWithoutTashkit: arabicWithoutTashkit,
             english: req.body.english,
             voice: newAzkarVoice
         });
@@ -140,6 +147,7 @@ export const addAzkar = async (req, res) => {
         await newAzkar.save();
         res.status(201).json({ message: 'azkar added successfully' });
     } catch (error) {
+        deleteFileWithPath(req.file.path)
         res.status(400).json({ error: error.message });
     }
 };
@@ -149,33 +157,28 @@ export const addAzkar = async (req, res) => {
 export const updateAzkar = async (req, res) => {
     try {
         const azkarToUpdate = await Azkar.findById(req.params.id);
+       // console.log(azkarToUpdate)
+        if (!azkarToUpdate) {
+
+            deleteFileWithPath(req.file.path)
+            return res.status(404).json({ message: 'aqidah not found' });
+        }
+
         const oldVoice = await AzkarVoice.findById(azkarToUpdate.voice)
         const newVoice = req.file
         let voiceData = {}
         let oldAzkarVoicePath;
         let newAzkarVoice
-        if (!azkarToUpdate) {
-    
-            fs.unlink(req.file.path, (err) => {
-                if (err) {
-                    console.error('Failed to delete old voice file:', err);
-                } else {
-                    console.log('AzkarVoice file deleted:', req.file.path);
-                }
-            })
-    
-            return res.status(404).json({ message: 'aqidah not found' });
-        }
-    
-    
-    
+
+
+
         if (newVoice) {
             const metadata = await mm.parseFile(newVoice.path);
             const duration = metadata.format?.duration || 0;
-    
+
             oldAzkarVoicePath = oldVoice.path
             console.log(oldVoice)
-    
+
             voiceData = {
                 filename: req.file.filename,
                 path: req.file.path,
@@ -183,51 +186,50 @@ export const updateAzkar = async (req, res) => {
                 type: req.file.mimetype,
                 size: req.file.size
             }
-    
+
             newAzkarVoice = new AzkarVoice(voiceData)
             await newAzkarVoice.save();
-    
+
         } else {
-            console.log("no new", oldVoice.filename)
-    
+
+
             voiceData = azkarToUpdate.voice
-    
+
         }
-        console.log(voiceData)
-    
-    
-    
-    
-    
+       // console.log(voiceData)
+
+
+
+
+        const arabicWithoutTashkit = removeDiacritics(req.body.arabic||"")
+
         const updatedAzkar = await Azkar.findByIdAndUpdate(
             req.params.id,
             {
-                aID: req.body.number,
-                arabic: req.body.arabic,
-                english: req.body.english,
+                zID: req.body.number || azkarToUpdate.number,
+                arabic: req.body.arabic || azkarToUpdate.arabic,
+                arabicWithoutTashkit: arabicWithoutTashkit || azkarToUpdate.arabicWithoutTashkit,
+                english: req.body.english || azkarToUpdate.english,
                 voice: newAzkarVoice || oldVoice
             },
-            { new: true }
+            {
+                new: true,
+                projection: { zID: 1, arabic: 1, english: 1, voice: 1, type: 1 }
+            }
         );
-    
-    
+
+
         if (oldAzkarVoicePath) {
-            fs.unlink(oldAzkarVoicePath, (err) => {
-                if (err) {
-                    console.error('Failed to delete old voice file:', err);
-                } else {
-                    console.log('Old voice file deleted:', oldAzkarVoicePath);
-                }
-            });
+            deleteFileWithPath(oldAzkarVoicePath)
         }
-    
+
         res.status(200).json(updatedAzkar);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
-    
-    
-    
+
+
+
     /*
     try {
         const azkarToUpdate = await Azkar.findById(req.params.id);
@@ -323,13 +325,7 @@ export const deleteAzkar = async (req, res) => {
 
         // Now, safely delete the voice file from the file system
         if (voice && voice.path) {
-            fs.unlink(voice.path, (err) => {
-                if (err) {
-                    console.error('Failed to delete old voice file:', err);
-                } else {
-                    console.log('AzkarVoice file deleted:', voice.path);
-                }
-            });
+            deleteFileWithPath(voice.path)
         }
 
         res.status(200).json({ message: 'Azkar and associated voice deleted successfully' });
@@ -351,21 +347,21 @@ export const getTotalAzkarCount = async (req, res) => {
 };
 
 
-export const getTypes= async (req, res)=>{
-try{
+export const getTypes = async (req, res) => {
+    try {
 
-   
-    const aqidahs = await Azkar.find().populate().select({_id:0,type:1})
-    
-    if(aqidahs){
-        const typesArray =[ ...new Set(aqidahs.map(aqidah => aqidah.type))]  
-        
-        
-        res.status(200).send(typesArray)
-    }else{
-        res.status(400).json("there are no types")
-    }
-}catch (error) {
+
+        const aqidahs = await Azkar.find().populate().select({ _id: 0, type: 1 })
+
+        if (aqidahs) {
+            const typesArray = [...new Set(aqidahs.map(aqidah => aqidah.type))]
+
+
+            res.status(200).send(typesArray)
+        } else {
+            res.status(400).json("there are no types")
+        }
+    } catch (error) {
         res.status(500).json({ error: error.message });
     }
 }

@@ -15,6 +15,7 @@ const azkarSchema = new Schema({
     zID: { type: Number, required: true, unique: true },
     type: { type: String, required: true },
     arabic: { type: String, required: true },
+    arabicWithoutTashkit: { type: String, required: true },
     english: { type: String, required: true },
     voice: { type: mongoose.Schema.Types.ObjectId, ref: 'AzkarVoice', required: true },
 

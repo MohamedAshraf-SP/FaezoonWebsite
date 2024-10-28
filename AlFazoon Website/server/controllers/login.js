@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 
 export const login = async (req, res) => {
   const { userName, password } = req.body;
-  console.log(userName,password);
+  ///console.log(userName,password);
 
   try {
     const user = await Teacher.findOne({ userName });

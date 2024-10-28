@@ -14,6 +14,7 @@ export const ArboonNawwiVoice = mongoose.model('ArboonNawwiVoice', arboonNawwiVo
 const arboonNawwiSchema = new Schema({
     nID: { type: Number, required: true, unique: true },
     arabic: { type: String, required: true },
+    arabicWithoutTashkit: { type: String, required: true },
     english: { type: String, required: true },
     voice: { type: mongoose.Schema.Types.ObjectId, ref: 'ArboonNawwiVoice', required: true },
 

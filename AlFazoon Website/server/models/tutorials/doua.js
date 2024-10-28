@@ -14,6 +14,7 @@ export const DouaVoice = mongoose.model('DouaVoice', douaVoiceSchema);
 const douaSchema = new Schema({
     dID: { type: Number, required: true, unique: true },
     arabic: { type: String, required: true },
+    arabicWithoutTashkit: { type: String, required: true },
     english: { type: String, required: true },
     type: { type: String, required: true },
     voice: { type: mongoose.Schema.Types.ObjectId, ref: 'DouaVoice', required: true },

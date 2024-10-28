@@ -4,6 +4,8 @@ import * as mm from 'music-metadata';
 import fs from 'fs'
 import { Console } from 'console';
 import mongoose from 'mongoose';
+import { removeDiacritics } from '../../helpers/removeDiacritics.js';
+import { deleteFileWithPath } from '../../helpers/deleteFile.js';
 
 // Search doua in text
 export const searchDoua = async (req, res) => {
@@ -42,7 +44,7 @@ export const searchDoua = async (req, res) => {
         // console.log(queryConditions)
 
 
-        const douas = await Doua.find({ $or: [...queryConditions] })
+        const douas = await Doua.find({ $or: [...queryConditions] }, { dID: 1, arabic: 1, english: 1 }).limit(10)
 
         if (!douas) {
             return res.status(404).json({ message: 'doua not found' });
@@ -66,6 +68,7 @@ export const getDouaById = async (req, res) => {
             "_id": doua._id,
             "dID": doua.dID,
             "arabic": doua.arabic,
+            "arabicwithoutTashkeel": doua.arabicWithoutTashkit,
             "english": doua.english,
             "type": doua.type,
             "voice": doua.voice,
@@ -90,7 +93,7 @@ export const getDouas = async (req, res) => {
     const pagesCount = Math.ceil(douaCount / limit) || 0
 
     try {
-        const douas = await Doua.find().skip(skip).limit(limit) // Skip the specified number of documents.limit(limit);;
+        const douas = await Doua.find({}, { dID: 1, arabic: 1, english: 1, voice: 1, type: 1 }).skip(skip).limit(limit) // Skip the specified number of documents.limit(limit);;
         res.status(200).json({
             "currentPage": page,
             "pagesCount": pagesCount,
@@ -127,10 +130,12 @@ export const addDoua = async (req, res) => {
         })
         await newDouaVoice.save();
         // let cryptedPassword = req.body.password  
+        const arabicWithoutTashkit = removeDiacritics(req.body.arabic)
         const newDoua = new Doua({
             dID: req.body.number,
             type: req.body.type,
             arabic: req.body.arabic,
+            arabicWithoutTashkit: arabicWithoutTashkit,
             english: req.body.english,
             voice: newDouaVoice
         });
@@ -138,6 +143,7 @@ export const addDoua = async (req, res) => {
         await newDoua.save();
         res.status(201).json({ message: 'doua added successfully' });
     } catch (error) {
+        deleteFileWithPath(req.file.path)
         res.status(400).json({ error: error.message });
     }
 };
@@ -147,23 +153,18 @@ export const addDoua = async (req, res) => {
 export const updateDoua = async (req, res) => {
     try {
         const douaToUpdate = await Doua.findById(req.params.id);
+
+        if (!douaToUpdate) {
+
+            deleteFileWithPath(deleteFileWithPath(voice.path))
+
+            return res.status(404).json({ message: 'aqidah not found' });
+        }
         const oldVoice = await DouaVoice.findById(douaToUpdate.voice)
         const newVoice = req.file
         let voiceData = {}
         let oldDouaVoicePath;
         let newDouaVoice
-        if (!douaToUpdate) {
-
-            fs.unlink(req.file.path, (err) => {
-                if (err) {
-                    console.error('Failed to delete old voice file:', err);
-                } else {
-                    console.log('DouaVoice file deleted:', req.file.path);
-                }
-            })
-
-            return res.status(404).json({ message: 'aqidah not found' });
-        }
 
 
 
@@ -186,37 +187,34 @@ export const updateDoua = async (req, res) => {
             await newDouaVoice.save();
 
         } else {
-            console.log("no new", oldVoice.filename)
 
             voiceData = douaToUpdate.voice
 
         }
-        console.log(voiceData)
+        // console.log(voiceData)
 
 
 
 
-
+        const arabicWithoutTashkit = removeDiacritics(req.body.arabic || "")
         const updatedDoua = await Doua.findByIdAndUpdate(
             req.params.id,
             {
-                aID: req.body.number,
-                arabic: req.body.arabic,
-                english: req.body.english,
+                dID: req.body.number || douaToUpdate.number,
+                arabic: req.body.arabic || douaToUpdate.arabic,
+                arabicWithoutTashkit: arabicWithoutTashkit || douaToUpdate.arabicWithoutTashkit,
+                english: req.body.english || douaToUpdate.english,
                 voice: newDouaVoice || oldVoice
             },
-            { new: true }
+            {
+                new: true,
+                projection: { dID: 1, arabic: 1, english: 1, voice: 1, type: 1 }
+            }
         );
 
 
         if (oldDouaVoicePath) {
-            fs.unlink(oldDouaVoicePath, (err) => {
-                if (err) {
-                    console.error('Failed to delete old voice file:', err);
-                } else {
-                    console.log('Old voice file deleted:', oldDouaVoicePath);
-                }
-            });
+            deleteFileWithPath(oldDouaVoicePath)
         }
 
         res.status(200).json(updatedDoua);
@@ -317,13 +315,7 @@ export const deleteDoua = async (req, res) => {
 
         // Now, safely delete the voice file from the file system
         if (voice && voice.path) {
-            fs.unlink(voice.path, (err) => {
-                if (err) {
-                    console.error('Failed to delete old voice file:', err);
-                } else {
-                    console.log('DouaVoice file deleted:', voice.path);
-                }
-            });
+            deleteFileWithPath(voice.path)
         }
 
         res.status(200).json({ message: 'Doua and associated voice deleted successfully' });

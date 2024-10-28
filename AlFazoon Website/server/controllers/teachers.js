@@ -29,7 +29,7 @@ export const getTeachers = async (req, res) => {
 // Add a new teacher
 export const addTeacher = async (req, res) => {
   try {
-    console.log(req);
+    //console.log(req);
     const newTeacher = new Teacher({
       userName: req.body.userName,
       password: req.body.password,

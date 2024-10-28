@@ -4,23 +4,11 @@ import * as mm from 'music-metadata';
 import fs from 'fs'
 import { Console } from 'console';
 import mongoose from 'mongoose';
+import { removeDiacritics } from '../../helpers/removeDiacritics.js';
+import { deleteFileWithPath } from '../../helpers/deleteFile.js';
 
 // Search hadith in text
 export const searchHadith = async (req, res) => {
-    // try {
-    //     const searchArabicWord = req.body.arabic || ""
-    //     const searchEnglishWord = req.body.english || ""
-    //     console.log(searchArabicWord, searchEnglishWord)
-
-
-    //     const hadiths = await Hadith.find({
-    //         $or: [
-    //             {  hID: req.body.hID||-1},
-    //             { arabic: { $regex: searchArabicWord, $options: 'i' } }, // Case-insensitive search in Arabic
-    //             { english: { $regex: searchEnglishWord, $options: 'i' } }, // Case-insensitive search in English
-    //         ]
-    //     });
-
     try {
 
         const searchWord = req.body.searchWord || "";
@@ -33,6 +21,7 @@ export const searchHadith = async (req, res) => {
             queryConditions.push({ hID: hID });
         } else if (searchWord) {
             queryConditions.push({ arabic: { $regex: searchWord, $options: 'i' } });
+            queryConditions.push({  arabicWithoutTashkit: { $regex: searchWord, $options: 'i' } });
             queryConditions.push({ english: { $regex: searchWord, $options: 'i' } });
         } else {
             queryConditions.push({ nothing: 0 });
@@ -40,8 +29,8 @@ export const searchHadith = async (req, res) => {
 
         // console.log(queryConditions)
 
-
-        const hadiths = await Hadith.find({ $or: [...queryConditions] }).limit(10)
+       
+        const hadiths = await Hadith.find({ $or: [...queryConditions] },{ hID: 1, arabic: 1, english: 1 }).limit(10)
 
         if (!hadiths) {
             return res.status(404).json({ message: 'hadith not found' });
@@ -65,6 +54,7 @@ export const getHadithById = async (req, res) => {
             "_id": hadith._id,
             "hID": hadith.hID,
             "arabic": hadith.arabic,
+            "arabicWithoutTashkeel": hadith.arabicWithoutTashkit,
             "english": hadith.english,
             "voice": hadith.voice,
         }
@@ -73,7 +63,6 @@ export const getHadithById = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
-
 
 // Get all hadiths
 export const getHadiths = async (req, res) => {
@@ -88,7 +77,7 @@ export const getHadiths = async (req, res) => {
     const pagesCount = Math.ceil(hadithCount / limit) || 0
 
     try {
-        const hadiths = await Hadith.find().skip(skip).limit(limit) // Skip the specified number of documents.limit(limit);;
+        const hadiths = await Hadith.find({},{ hID: 1, arabic: 1, english: 1,voice:1 }).skip(skip).limit(limit) // Skip the specified number of documents.limit(limit);;
         res.status(200).json({
             "currentPage": page,
             "pagesCount": pagesCount,
@@ -97,6 +86,7 @@ export const getHadiths = async (req, res) => {
         })
 
     } catch (error) {
+        deleteFileWithPath(req.file.path)
         res.status(500).json({ error: error.message });
     }
 };
@@ -124,10 +114,13 @@ export const addHadith = async (req, res) => {
             size: req.file.size
         })
         await newHadithVoice.save();
+
+        const arabicWithoutTashkit = removeDiacritics(req.body.arabic)
         // let cryptedPassword = req.body.password  
         const newHadith = new Hadith({
             hID: req.body.number,
             arabic: req.body.arabic,
+            arabicWithoutTashkit: arabicWithoutTashkit,
             english: req.body.english,
             voice: newHadithVoice
         });
@@ -144,24 +137,20 @@ export const addHadith = async (req, res) => {
 export const updateHadith = async (req, res) => {
 
     try {
-        const hadithToUpdate = await Hadith.findById(req.params.id);
+        const hadithToUpdate = await Hadith.findById(req.params.id).select({ hID: 1, arabic: 1, english: 1,arabicWithoutTashkit:1,voice:1});
+        //to delete the uploded file if the documet not found
+        if (!hadithToUpdate) {
+            deleteFileWithPath(req.file.path)
+            return res.status(404).json({ message: 'aqidah not found' });
+        }
+
+
         const oldVoice = await HadithVoice.findById(hadithToUpdate.voice)
         const newVoice = req.file
         let voiceData = {}
         let oldHadithVoicePath;
         let newHadithVoice
-        if (!hadithToUpdate) {
-    
-            fs.unlink(req.file.path, (err) => {
-                if (err) {
-                    console.error('Failed to delete old voice file:', err);
-                } else {
-                    console.log('HadithVoice file deleted:', req.file.path);
-                }
-            })
-    
-            return res.status(404).json({ message: 'aqidah not found' });
-        }
+
     
     
     
@@ -170,7 +159,7 @@ export const updateHadith = async (req, res) => {
             const duration = metadata.format?.duration || 0;
     
             oldHadithVoicePath = oldVoice.path
-            console.log(oldVoice)
+            //console.log(oldVoice)
     
             voiceData = {
                 filename: req.file.filename,
@@ -184,37 +173,32 @@ export const updateHadith = async (req, res) => {
             await newHadithVoice.save();
     
         } else {
-            console.log("no new", oldVoice.filename)
-    
             voiceData = hadithToUpdate.voice
-    
         }
-        console.log(voiceData)
+
     
     
+
+      //  console.log(req.body.arabic)
+        const arabicWithoutTashkit = removeDiacritics(req.body.arabic||"")
     
-    
-    
-        const updatedHadith = await Hadith.findByIdAndUpdate(
+    const updatedHadith = await Hadith.findByIdAndUpdate(
             req.params.id,
             {
-                aID: req.body.number,
-                arabic: req.body.arabic,
-                english: req.body.english,
+                hID: req.body.number||hadithToUpdate.number,
+                arabic: req.body.arabic||hadithToUpdate.arabic,
+                arabicWithoutTashkit: arabicWithoutTashkit||hadithToUpdate.arabicWithoutTashkit,
+                english: req.body.english||hadithToUpdate.english,
                 voice: newHadithVoice || oldVoice
             },
-            { new: true }
+            { new: true,
+                projection: { hID: 1, arabic: 1, english: 1,voice:1,arabicWithoutTashkit:1 }
+             }
         );
     
     
         if (oldHadithVoicePath) {
-            fs.unlink(oldHadithVoicePath, (err) => {
-                if (err) {
-                    console.error('Failed to delete old voice file:', err);
-                } else {
-                    console.log('Old voice file deleted:', oldHadithVoicePath);
-                }
-            });
+            deleteFileWithPath(oldHadithVoicePath)
         }
     
         res.status(200).json(updatedHadith);
@@ -222,84 +206,6 @@ export const updateHadith = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
     };
-
-
-    /*
-    try {
-        const hadithToUpdate = await Hadith.findById(req.params.id);
-        if (!hadithToUpdate) {
-
-            fs.unlink(req.file.path, (err) => {
-                if (err) {
-                    console.error('Failed to delete old voice file:', err);
-                } else {
-                    console.log('HadithVoice file deleted:', req.file.path);
-                }
-            })
-
-            return res.status(404).json({ message: 'hadith not found' });
-        }
-
-        //console.log(hadithToUpdate.voice)
-
-        const voice = req.file
-        let voiceData = {}
-        let oldHadithVoicePath;
-
-        if (voice) {
-            const metadata = await mm.parseFile(voice.path);
-            const duration = metadata.format?.duration || 0;
-            const oldvoice = await HadithVoice.findById(hadithToUpdate.voice)
-            oldHadithVoicePath = oldvoice.path
-
-            voiceData = {
-                filename: req.file.filename,
-                path: req.file.path,
-                duration: duration,
-                type: req.file.mimetype,
-                size: req.file.size
-            }
-
-        } else {
-
-            voiceData = hadithToUpdate.voice
-
-        }
-
-
-        const newHadithVoice = new HadithVoice(voiceData)
-        await newHadithVoice.save();
-
-
-        const updatedHadith = await Hadith.findByIdAndUpdate(
-            req.params.id,
-            {
-                hID: req.body.number,
-                arabic: req.body.arabic,
-                english: req.body.english,
-                voice: newHadithVoice
-            },
-            { new: true }
-        );
-
-
-        if (oldHadithVoicePath) {
-            fs.unlink(oldHadithVoicePath, (err) => {
-                if (err) {
-                    console.error('Failed to delete old voice file:', err);
-                } else {
-                    console.log('Old voice file deleted:', oldHadithVoicePath);
-                }
-            });
-        }
-
-        res.status(200).json(updatedHadith);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-};
-
-*/
 
 
 // Delete hadith by ID
@@ -311,18 +217,11 @@ export const deleteHadith = async (req, res) => {
         if (!result) {
             return res.status(404).json({ message: 'Hadith not found' });
         }
+        
+        const voice = result.voice;  
 
-        const voice = result.voice;  // The voice is already populated
-
-        // Now, safely delete the voice file from the file system
         if (voice && voice.path) {
-            fs.unlink(voice.path, (err) => {
-                if (err) {
-                    console.error('Failed to delete old voice file:', err);
-                } else {
-                    console.log('HadithVoice file deleted:', voice.path);
-                }
-            });
+            deleteFileWithPath(voice.path)
         }
 
         res.status(200).json({ message: 'Hadith and associated voice deleted successfully' });

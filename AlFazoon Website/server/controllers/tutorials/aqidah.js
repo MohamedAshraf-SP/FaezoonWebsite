@@ -5,22 +5,12 @@ import fs from 'fs'
 import { Console } from 'console';
 import mongoose from 'mongoose';
 import { type } from 'os';
+import { removeDiacritics } from '../../helpers/removeDiacritics.js';
+import { deleteFileWithPath } from '../../helpers/deleteFile.js';
 
 // Search aqidah in text
 export const searchAqidah = async (req, res) => {
-    // try {
-    //     const searchArabicWord = req.body.arabic || ""
-    //     const searchEnglishWord = req.body.english || ""
-    //     console.log(searchArabicWord, searchEnglishWord)
 
-
-    //     const aqidahs = await Aqidah.find({
-    //         $or: [
-    //             {  aID: req.body.aID||-1},
-    //             { arabic: { $regex: searchArabicWord, $options: 'i' } }, // Case-insensitive search in Arabic
-    //             { english: { $regex: searchEnglishWord, $options: 'i' } }, // Case-insensitive search in English
-    //         ]
-    //     });
 
     try {
         const searchWord = req.body.searchWord || "";
@@ -32,7 +22,8 @@ export const searchAqidah = async (req, res) => {
         if (!isNaN(hID) && hID != -1) {  // hID should be a positive number
             queryConditions.push({ hID: hID });
         } else if (searchWord) {
-            queryConditions.push({ arabic: { $regex: searchWord, $options: 'i' } });
+            queryConditions.push({ arabic: { $regex: new RegExp(searchWord, 'i') } });
+            queryConditions.push({ arabicWithoutTashkit: { $regex: searchWord, $options: 'i' } });
             queryConditions.push({ english: { $regex: searchWord, $options: 'i' } });
         } else {
             queryConditions.push({ nothing: 0 });
@@ -41,7 +32,10 @@ export const searchAqidah = async (req, res) => {
 
 
 
-        const aqidahs = await Aqidah.find({ $or: [...queryConditions] }).limit(10)
+        const aqidahs = await Aqidah.find(
+            { $or: [...queryConditions] }, // الشرط
+            { aID: 1, arabic: 1, english: 1 } // التوقعات
+        ).limit(10);
 
         if (!aqidahs) {
             return res.status(404).json({ message: 'aqidah not found' });
@@ -123,11 +117,14 @@ export const addAqidah = async (req, res) => {
             type: req.file.mimetype,
             size: req.file.size
         })
+
+        const arabicWithoutTashkit = removeDiacritics(req.body.arabic)
         await newAqidahVoice.save();
         // let cryptedPassword = req.body.password  
         const newAqidah = new Aqidah({
             aID: req.body.number,
             arabic: req.body.arabic,
+            arabicWithoutTashkit: arabicWithoutTashkit,
             english: req.body.english,
             voice: newAqidahVoice
         });
@@ -135,6 +132,7 @@ export const addAqidah = async (req, res) => {
         await newAqidah.save();
         res.status(201).json({ message: 'aqidah added successfully' });
     } catch (error) {
+        deleteFileWithPath(req.file.path)
         res.status(400).json({ error: error.message });
     }
 };
@@ -144,23 +142,18 @@ export const addAqidah = async (req, res) => {
 export const updateAqidah = async (req, res) => {
     try {
         const aqidahToUpdate = await Aqidah.findById(req.params.id);
+
+        if (!aqidahToUpdate) {
+            deleteFileWithPath(req.file.path)
+            return res.status(404).json({ message: 'Aqidah Not Found!!' });
+        }
+
+
         const oldVoice = await AqidahVoice.findById(aqidahToUpdate.voice)
         const newVoice = req.file
         let voiceData = {}
         let oldAqidahVoicePath;
         let newAqidahVoice
-        if (!aqidahToUpdate) {
-
-            fs.unlink(req.file.path, (err) => {
-                if (err) {
-                    console.error('Failed to delete old voice file:', err);
-                } else {
-                    console.log('AqidahVoice file deleted:', req.file.path);
-                }
-            })
-
-            return res.status(404).json({ message: 'aqidah not found' });
-        }
 
 
 
@@ -169,7 +162,7 @@ export const updateAqidah = async (req, res) => {
             const duration = metadata.format?.duration || 0;
 
             oldAqidahVoicePath = oldVoice.path
-            console.log(oldVoice)
+           // console.log(oldVoice)
 
             voiceData = {
                 filename: req.file.filename,
@@ -183,37 +176,35 @@ export const updateAqidah = async (req, res) => {
             await newAqidahVoice.save();
 
         } else {
-            console.log("no new", oldVoice.filename)
 
             voiceData = aqidahToUpdate.voice
 
         }
-        console.log(voiceData)
+        //console.log(voiceData)
 
 
 
-
+        const arabicWithoutTashkit = removeDiacritics(req.body.arabic||"")
 
         const updatedAqidah = await Aqidah.findByIdAndUpdate(
             req.params.id,
             {
-                aID: req.body.number,
-                arabic: req.body.arabic,
-                english: req.body.english,
+                aID: req.body.number || aqidahToUpdate.number,
+                arabic: req.body.arabic || aqidahToUpdate.arabic,
+                arabicWithoutTashkit: arabicWithoutTashkit || aqidahToUpdate.arabicWithoutTashkit,
+                english: req.body.english || aqidahToUpdate.english,
                 voice: newAqidahVoice || oldVoice
             },
-            { new: true }
+            {
+                new: true,
+                projection: { aID: 1, arabic: 1, english: 1 }
+            }
         );
 
 
+
         if (oldAqidahVoicePath) {
-            fs.unlink(oldAqidahVoicePath, (err) => {
-                if (err) {
-                    console.error('Failed to delete old voice file:', err);
-                } else {
-                    console.log('Old voice file deleted:', oldAqidahVoicePath);
-                }
-            });
+            deleteFileWithPath(oldAqidahVoicePath)
         }
 
         res.status(200).json(updatedAqidah);
@@ -237,13 +228,7 @@ export const deleteAqidah = async (req, res) => {
 
         // Now, safely delete the voice file from the file system
         if (voice && voice.path) {
-            fs.unlink(voice.path, (err) => {
-                if (err) {
-                    console.error('Failed to delete old voice file:', err);
-                } else {
-                    console.log('AqidahVoice file deleted:', voice.path);
-                }
-            });
+            deleteFileWithPath(voice.path)
         }
 
         res.status(200).json({ message: 'Aqidah and associated voice deleted successfully' });
@@ -267,6 +252,6 @@ export const getTotalAqidahCount = async (req, res) => {
 };
 
 
-export const getTypes= async (req, res)=>{
+export const getTypes = async (req, res) => {
     const aqidahs = await Aqidah.find().populate().type
 }
