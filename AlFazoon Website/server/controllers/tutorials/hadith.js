@@ -142,6 +142,89 @@ export const addHadith = async (req, res) => {
 
 // Update hadith by ID
 export const updateHadith = async (req, res) => {
+
+    try {
+        const hadithToUpdate = await Hadith.findById(req.params.id);
+        const oldVoice = await HadithVoice.findById(hadithToUpdate.voice)
+        const newVoice = req.file
+        let voiceData = {}
+        let oldHadithVoicePath;
+        let newHadithVoice
+        if (!hadithToUpdate) {
+    
+            fs.unlink(req.file.path, (err) => {
+                if (err) {
+                    console.error('Failed to delete old voice file:', err);
+                } else {
+                    console.log('HadithVoice file deleted:', req.file.path);
+                }
+            })
+    
+            return res.status(404).json({ message: 'aqidah not found' });
+        }
+    
+    
+    
+        if (newVoice) {
+            const metadata = await mm.parseFile(newVoice.path);
+            const duration = metadata.format?.duration || 0;
+    
+            oldHadithVoicePath = oldVoice.path
+            console.log(oldVoice)
+    
+            voiceData = {
+                filename: req.file.filename,
+                path: req.file.path,
+                duration: duration,
+                type: req.file.mimetype,
+                size: req.file.size
+            }
+    
+            newHadithVoice = new HadithVoice(voiceData)
+            await newHadithVoice.save();
+    
+        } else {
+            console.log("no new", oldVoice.filename)
+    
+            voiceData = hadithToUpdate.voice
+    
+        }
+        console.log(voiceData)
+    
+    
+    
+    
+    
+        const updatedHadith = await Hadith.findByIdAndUpdate(
+            req.params.id,
+            {
+                aID: req.body.number,
+                arabic: req.body.arabic,
+                english: req.body.english,
+                voice: newHadithVoice || oldVoice
+            },
+            { new: true }
+        );
+    
+    
+        if (oldHadithVoicePath) {
+            fs.unlink(oldHadithVoicePath, (err) => {
+                if (err) {
+                    console.error('Failed to delete old voice file:', err);
+                } else {
+                    console.log('Old voice file deleted:', oldHadithVoicePath);
+                }
+            });
+        }
+    
+        res.status(200).json(updatedHadith);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+    };
+
+
+    /*
     try {
         const hadithToUpdate = await Hadith.findById(req.params.id);
         if (!hadithToUpdate) {
@@ -216,7 +299,7 @@ export const updateHadith = async (req, res) => {
     }
 };
 
-
+*/
 
 
 // Delete hadith by ID

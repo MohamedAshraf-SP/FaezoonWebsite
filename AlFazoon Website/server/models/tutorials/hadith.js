@@ -16,7 +16,6 @@ const hadithSchema = new Schema({
     arabic: { type: String, required: true },
     english: { type: String, required: true },
     voice: { type: mongoose.Schema.Types.ObjectId, ref: 'HadithVoice', required: true },
-
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
 });

@@ -4,6 +4,7 @@ import * as mm from 'music-metadata';
 import fs from 'fs'
 import { Console } from 'console';
 import mongoose from 'mongoose';
+import { type } from 'os';
 
 // Search aqidah in text
 export const searchAqidah = async (req, res) => {
@@ -106,7 +107,7 @@ export const addAqidah = async (req, res) => {
 
 
         const voice = req.file
-       // console.log(voice)
+        // console.log(voice)
         if (!voice) {
             return res.status(404).json({ error: "voice not found" });
         }
@@ -143,6 +144,11 @@ export const addAqidah = async (req, res) => {
 export const updateAqidah = async (req, res) => {
     try {
         const aqidahToUpdate = await Aqidah.findById(req.params.id);
+        const oldVoice = await AqidahVoice.findById(aqidahToUpdate.voice)
+        const newVoice = req.file
+        let voiceData = {}
+        let oldAqidahVoicePath;
+        let newAqidahVoice
         if (!aqidahToUpdate) {
 
             fs.unlink(req.file.path, (err) => {
@@ -156,17 +162,14 @@ export const updateAqidah = async (req, res) => {
             return res.status(404).json({ message: 'aqidah not found' });
         }
 
-        console.log(aqidahToUpdate.voice)
 
-        const voice = req.file
-        let voiceData = {}
-        let oldAqidahVoicePath;
 
-        if (voice) {
-            const metadata = await mm.parseFile(voice.path);
+        if (newVoice) {
+            const metadata = await mm.parseFile(newVoice.path);
             const duration = metadata.format?.duration || 0;
-            const oldvoice = await AqidahVoice.findById(aqidahToUpdate.voice)
-            oldAqidahVoicePath = oldvoice.path
+
+            oldAqidahVoicePath = oldVoice.path
+            console.log(oldVoice)
 
             voiceData = {
                 filename: req.file.filename,
@@ -176,15 +179,19 @@ export const updateAqidah = async (req, res) => {
                 size: req.file.size
             }
 
+            newAqidahVoice = new AqidahVoice(voiceData)
+            await newAqidahVoice.save();
+
         } else {
+            console.log("no new", oldVoice.filename)
 
             voiceData = aqidahToUpdate.voice
 
         }
+        console.log(voiceData)
 
 
-        const newAqidahVoice = new AqidahVoice(voiceData)
-        await newAqidahVoice.save();
+
 
 
         const updatedAqidah = await Aqidah.findByIdAndUpdate(
@@ -193,7 +200,7 @@ export const updateAqidah = async (req, res) => {
                 aID: req.body.number,
                 arabic: req.body.arabic,
                 english: req.body.english,
-                voice: newAqidahVoice
+                voice: newAqidahVoice || oldVoice
             },
             { new: true }
         );
@@ -214,8 +221,6 @@ export const updateAqidah = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
-
-
 
 
 // Delete aqidah by ID
@@ -250,11 +255,18 @@ export const deleteAqidah = async (req, res) => {
 
 
 // Get the total number of aqidahs
+
 export const getTotalAqidahCount = async (req, res) => {
     try {
         const count = await Aqidah.countDocuments();
-        res.status(200).json({ count });
+        const aqidahs = await Aqidah.find().populate().select('aID arabic voice type')
+        res.status(200).json({ aqidahs });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
+
+
+export const getTypes= async (req, res)=>{
+    const aqidahs = await Aqidah.find().populate().type
+}

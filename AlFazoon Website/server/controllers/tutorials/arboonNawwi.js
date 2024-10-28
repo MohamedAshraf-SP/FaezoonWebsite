@@ -141,7 +141,86 @@ export const addArboonNawwi = async (req, res) => {
 
 
 // Update arboonNawwi by ID
-export const updateArboonNawwi = async (req, res) => {
+export const updateArboonNawwi = async (req, res) =>{
+    try {
+    const arboonNawwiToUpdate = await ArboonNawwi.findById(req.params.id);
+    const oldVoice = await ArboonNawwiVoice.findById(arboonNawwiToUpdate.voice)
+    const newVoice = req.file
+    let voiceData = {}
+    let oldArboonNawwiVoicePath;
+    let newArboonNawwiVoice
+    if (!arboonNawwiToUpdate) {
+
+        fs.unlink(req.file.path, (err) => {
+            if (err) {
+                console.error('Failed to delete old voice file:', err);
+            } else {
+                console.log('ArboonNawwiVoice file deleted:', req.file.path);
+            }
+        })
+
+        return res.status(404).json({ message: 'aqidah not found' });
+    }
+
+
+
+    if (newVoice) {
+        const metadata = await mm.parseFile(newVoice.path);
+        const duration = metadata.format?.duration || 0;
+
+        oldArboonNawwiVoicePath = oldVoice.path
+        console.log(oldVoice)
+
+        voiceData = {
+            filename: req.file.filename,
+            path: req.file.path,
+            duration: duration,
+            type: req.file.mimetype,
+            size: req.file.size
+        }
+
+        newArboonNawwiVoice = new ArboonNawwiVoice(voiceData)
+        await newArboonNawwiVoice.save();
+
+    } else {
+        console.log("no new", oldVoice.filename)
+
+        voiceData = arboonNawwiToUpdate.voice
+
+    }
+    console.log(voiceData)
+
+
+
+
+
+    const updatedArboonNawwi = await ArboonNawwi.findByIdAndUpdate(
+        req.params.id,
+        {
+            aID: req.body.number,
+            arabic: req.body.arabic,
+            english: req.body.english,
+            voice: newArboonNawwiVoice || oldVoice
+        },
+        { new: true }
+    );
+
+
+    if (oldArboonNawwiVoicePath) {
+        fs.unlink(oldArboonNawwiVoicePath, (err) => {
+            if (err) {
+                console.error('Failed to delete old voice file:', err);
+            } else {
+                console.log('Old voice file deleted:', oldArboonNawwiVoicePath);
+            }
+        });
+    }
+
+    res.status(200).json(updatedArboonNawwi);
+} catch (error) {
+    res.status(400).json({ error: error.message });
+}}
+;/* {
     try {
         const arboonNawwiToUpdate = await ArboonNawwi.findById(req.params.id);
         if (!arboonNawwiToUpdate) {
@@ -216,7 +295,7 @@ export const updateArboonNawwi = async (req, res) => {
     }
 };
 
-
+*/
 
 
 // Delete arboonNawwi by ID

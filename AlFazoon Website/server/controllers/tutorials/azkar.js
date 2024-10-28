@@ -7,20 +7,22 @@ import mongoose from 'mongoose';
 
 // Search azkar in text
 export const searchAzkar = async (req, res) => {
-    // try {
-    //     const searchArabicWord = req.body.arabic || ""
-    //     const searchEnglishWord = req.body.english || ""
-    //     console.log(searchArabicWord, searchEnglishWord)
+  
+/* 
+        try {
+        const searchArabicWord = req.body.arabic || ""
+        const searchEnglishWord = req.body.english || ""
+        console.log(searchArabicWord, searchEnglishWord)
 
 
-    //     const azkars = await Azkar.find({
-    //         $or: [
-    //             {  zID: req.body.zID||-1},
-    //             { arabic: { $regex: searchArabicWord, $options: 'i' } }, // Case-insensitive search in Arabic
-    //             { english: { $regex: searchEnglishWord, $options: 'i' } }, // Case-insensitive search in English
-    //         ]
-    //     });
-
+        const azkars = await Azkar.find({
+            $or: [
+                {  zID: req.body.zID||-1},
+                { arabic: { $regex: searchArabicWord, $options: 'i' } }, // Case-insensitive search in Arabic
+                { english: { $regex: searchEnglishWord, $options: 'i' } }, // Case-insensitive search in English
+            ]
+        });
+*/
     try {
 
         const searchWord = req.body.searchWord || "";
@@ -147,6 +149,88 @@ export const addAzkar = async (req, res) => {
 export const updateAzkar = async (req, res) => {
     try {
         const azkarToUpdate = await Azkar.findById(req.params.id);
+        const oldVoice = await AzkarVoice.findById(azkarToUpdate.voice)
+        const newVoice = req.file
+        let voiceData = {}
+        let oldAzkarVoicePath;
+        let newAzkarVoice
+        if (!azkarToUpdate) {
+    
+            fs.unlink(req.file.path, (err) => {
+                if (err) {
+                    console.error('Failed to delete old voice file:', err);
+                } else {
+                    console.log('AzkarVoice file deleted:', req.file.path);
+                }
+            })
+    
+            return res.status(404).json({ message: 'aqidah not found' });
+        }
+    
+    
+    
+        if (newVoice) {
+            const metadata = await mm.parseFile(newVoice.path);
+            const duration = metadata.format?.duration || 0;
+    
+            oldAzkarVoicePath = oldVoice.path
+            console.log(oldVoice)
+    
+            voiceData = {
+                filename: req.file.filename,
+                path: req.file.path,
+                duration: duration,
+                type: req.file.mimetype,
+                size: req.file.size
+            }
+    
+            newAzkarVoice = new AzkarVoice(voiceData)
+            await newAzkarVoice.save();
+    
+        } else {
+            console.log("no new", oldVoice.filename)
+    
+            voiceData = azkarToUpdate.voice
+    
+        }
+        console.log(voiceData)
+    
+    
+    
+    
+    
+        const updatedAzkar = await Azkar.findByIdAndUpdate(
+            req.params.id,
+            {
+                aID: req.body.number,
+                arabic: req.body.arabic,
+                english: req.body.english,
+                voice: newAzkarVoice || oldVoice
+            },
+            { new: true }
+        );
+    
+    
+        if (oldAzkarVoicePath) {
+            fs.unlink(oldAzkarVoicePath, (err) => {
+                if (err) {
+                    console.error('Failed to delete old voice file:', err);
+                } else {
+                    console.log('Old voice file deleted:', oldAzkarVoicePath);
+                }
+            });
+        }
+    
+        res.status(200).json(updatedAzkar);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+    
+    
+    
+    /*
+    try {
+        const azkarToUpdate = await Azkar.findById(req.params.id);
         if (!azkarToUpdate) {
 
             fs.unlink(req.file.path, (err) => {
@@ -218,6 +302,8 @@ export const updateAzkar = async (req, res) => {
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
+
+    */
 };
 
 
@@ -263,3 +349,23 @@ export const getTotalAzkarCount = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+
+export const getTypes= async (req, res)=>{
+try{
+
+   
+    const aqidahs = await Azkar.find().populate().select({_id:0,type:1})
+    
+    if(aqidahs){
+        const typesArray =[ ...new Set(aqidahs.map(aqidah => aqidah.type))]  
+        
+        
+        res.status(200).send(typesArray)
+    }else{
+        res.status(400).json("there are no types")
+    }
+}catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
