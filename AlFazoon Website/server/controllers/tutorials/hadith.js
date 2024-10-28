@@ -21,7 +21,8 @@ export const searchHadith = async (req, res) => {
             queryConditions.push({ hID: hID });
         } else if (searchWord) {
             queryConditions.push({ arabic: { $regex: searchWord, $options: 'i' } });
-            queryConditions.push({  arabicWithoutTashkit: { $regex: searchWord, $options: 'i' } });
+            queryConditions.push({ name: { $regex: searchWord, $options: 'i' } });
+            queryConditions.push({ arabicWithoutTashkit: { $regex: searchWord, $options: 'i' } });
             queryConditions.push({ english: { $regex: searchWord, $options: 'i' } });
         } else {
             queryConditions.push({ nothing: 0 });
@@ -29,8 +30,8 @@ export const searchHadith = async (req, res) => {
 
         // console.log(queryConditions)
 
-       
-        const hadiths = await Hadith.find({ $or: [...queryConditions] },{ hID: 1, arabic: 1, english: 1 }).limit(10)
+
+        const hadiths = await Hadith.find({ $or: [...queryConditions] }, { hID: 1, name: 1, arabic: 1, english: 1 }).limit(10)
 
         if (!hadiths) {
             return res.status(404).json({ message: 'hadith not found' });
@@ -53,6 +54,7 @@ export const getHadithById = async (req, res) => {
         res.status(200).json({
             "_id": hadith._id,
             "hID": hadith.hID,
+            "name": hadith.name,
             "arabic": hadith.arabic,
             "arabicWithoutTashkeel": hadith.arabicWithoutTashkit,
             "english": hadith.english,
@@ -77,7 +79,7 @@ export const getHadiths = async (req, res) => {
     const pagesCount = Math.ceil(hadithCount / limit) || 0
 
     try {
-        const hadiths = await Hadith.find({},{ hID: 1, arabic: 1, english: 1,voice:1 }).skip(skip).limit(limit) // Skip the specified number of documents.limit(limit);;
+        const hadiths = await Hadith.find({}, { hID: 1, name: 1, arabic: 1, english: 1, voice: 1 }).skip(skip).limit(limit) // Skip the specified number of documents.limit(limit);;
         res.status(200).json({
             "currentPage": page,
             "pagesCount": pagesCount,
@@ -120,6 +122,7 @@ export const addHadith = async (req, res) => {
         const newHadith = new Hadith({
             hID: req.body.number,
             arabic: req.body.arabic,
+            name: req.body.name,
             arabicWithoutTashkit: arabicWithoutTashkit,
             english: req.body.english,
             voice: newHadithVoice
@@ -137,7 +140,7 @@ export const addHadith = async (req, res) => {
 export const updateHadith = async (req, res) => {
 
     try {
-        const hadithToUpdate = await Hadith.findById(req.params.id).select({ hID: 1, arabic: 1, english: 1,arabicWithoutTashkit:1,voice:1});
+        const hadithToUpdate = await Hadith.findById(req.params.id).select({ hID: 1, name: 1, arabic: 1, english: 1, arabicWithoutTashkit: 1, voice: 1 });
         //to delete the uploded file if the documet not found
         if (!hadithToUpdate) {
             deleteFileWithPath(req.file.path)
@@ -151,16 +154,16 @@ export const updateHadith = async (req, res) => {
         let oldHadithVoicePath;
         let newHadithVoice
 
-    
-    
-    
+
+
+
         if (newVoice) {
             const metadata = await mm.parseFile(newVoice.path);
             const duration = metadata.format?.duration || 0;
-    
+
             oldHadithVoicePath = oldVoice.path
             //console.log(oldVoice)
-    
+
             voiceData = {
                 filename: req.file.filename,
                 path: req.file.path,
@@ -168,44 +171,46 @@ export const updateHadith = async (req, res) => {
                 type: req.file.mimetype,
                 size: req.file.size
             }
-    
+
             newHadithVoice = new HadithVoice(voiceData)
             await newHadithVoice.save();
-    
+
         } else {
             voiceData = hadithToUpdate.voice
         }
 
-    
-    
 
-      //  console.log(req.body.arabic)
-        const arabicWithoutTashkit = removeDiacritics(req.body.arabic||"")
-    
-    const updatedHadith = await Hadith.findByIdAndUpdate(
+
+
+        //  console.log(req.body.arabic)
+        const arabicWithoutTashkit = removeDiacritics(req.body.arabic || "")
+
+        const updatedHadith = await Hadith.findByIdAndUpdate(
             req.params.id,
             {
-                hID: req.body.number||hadithToUpdate.number,
-                arabic: req.body.arabic||hadithToUpdate.arabic,
-                arabicWithoutTashkit: arabicWithoutTashkit||hadithToUpdate.arabicWithoutTashkit,
-                english: req.body.english||hadithToUpdate.english,
+                hID: req.body.number || hadithToUpdate.number,
+                arabic: req.body.arabic || hadithToUpdate.arabic,
+                name: req.body.name || hadithToUpdate.name,
+                arabicWithoutTashkit: arabicWithoutTashkit || hadithToUpdate.arabicWithoutTashkit,
+                english: req.body.english || hadithToUpdate.english,
                 voice: newHadithVoice || oldVoice
             },
-            { new: true,
-                projection: { hID: 1, arabic: 1, english: 1,voice:1,arabicWithoutTashkit:1 }
-             }
+            {
+                new: true,
+                projection: { hID: 1, name: 1, arabic: 1, english: 1, voice: 1, arabicWithoutTashkit: 1 }
+            }
         );
-    
-    
+
+
         if (oldHadithVoicePath) {
             deleteFileWithPath(oldHadithVoicePath)
         }
-    
+
         res.status(200).json(updatedHadith);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
-    };
+};
 
 
 // Delete hadith by ID
@@ -217,8 +222,8 @@ export const deleteHadith = async (req, res) => {
         if (!result) {
             return res.status(404).json({ message: 'Hadith not found' });
         }
-        
-        const voice = result.voice;  
+
+        const voice = result.voice;
 
         if (voice && voice.path) {
             deleteFileWithPath(voice.path)

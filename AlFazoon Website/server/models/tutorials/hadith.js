@@ -13,6 +13,7 @@ export const HadithVoice = mongoose.model('HadithVoice', hadithVoiceSchema);
 // create schema
 const hadithSchema = new Schema({
     hID: { type: Number, required: true, unique: true },
+    name: String,
     arabic: { type: String, required: true },
     arabicWithoutTashkit: { type: String, required: true },
     english: { type: String, required: true },
