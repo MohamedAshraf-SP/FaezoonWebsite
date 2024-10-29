@@ -110,6 +110,31 @@ export const getAzkars = async (req, res) => {
     }
 };
 
+export const getAzkarsByType = async (req, res) => {
+
+    const page = req.query.page || 1
+    const limit = req.query.limit || 10
+    const skip = (page - 1) * limit
+
+    const azkarCount = await Azkar.countDocuments()
+    // console.log(azkarCount)
+
+    const pagesCount = Math.ceil(azkarCount / limit) || 0
+
+    try {
+        const azkars = await Azkar.find({type:req.body.type}, { zID: 1, arabic: 1, english: 1, voice: 1, type: 1 }).skip(skip).limit(limit) // Skip the specified number of documents.limit(limit);;
+        res.status(200).json({
+            "currentPage": page,
+            "pagesCount": pagesCount,
+            "azkars": azkars,
+            "azkarCount": azkarCount
+        })
+
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 // Add a new azkar
 export const addAzkar = async (req, res) => {
     try {

@@ -10,6 +10,7 @@ import {
   deleteDoua,
   getTotalDouaCount,
   getTypes,
+  getDouasByType
 } from "../../controllers/tutorials/doua.js";
 import { upload } from "../../config/multer.js";
 
@@ -17,6 +18,7 @@ import { upload } from "../../config/multer.js";
 export const douasRoute = express.Router();
 douasRoute.post("", upload.single('voice'), addDoua);
 douasRoute.get("", getDouas);
+douasRoute.get("/by-type", getDouasByType);
 douasRoute.get("/Count", getTotalDouaCount);
 douasRoute.get("/types", getTypes);
 douasRoute.post("/search", searchDoua);

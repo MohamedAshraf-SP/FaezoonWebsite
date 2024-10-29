@@ -35,6 +35,7 @@ export const searchDoua = async (req, res) => {
             queryConditions.push({ dID: dID });
         } else if (searchWord) {
             queryConditions.push({ arabic: { $regex: searchWord, $options: 'i' } });
+            queryConditions.push({ arabicWithoutTashkit: { $regex: searchWord, $options: 'i' } });
             queryConditions.push({ name: { $regex: searchWord, $options: 'i' } });
             queryConditions.push({ english: { $regex: searchWord, $options: 'i' } });
             queryConditions.push({ type: { $regex: searchWord, $options: 'i' } });
@@ -83,6 +84,7 @@ export const getDouaById = async (req, res) => {
 
 
 // Get all douas
+
 export const getDouas = async (req, res) => {
 
     const page = req.query.page || 1
@@ -96,6 +98,31 @@ export const getDouas = async (req, res) => {
 
     try {
         const douas = await Doua.find({}, { dID: 1, name: 1, arabic: 1, english: 1, voice: 1, type: 1 }).skip(skip).limit(limit) // Skip the specified number of documents.limit(limit);;
+        res.status(200).json({
+            "currentPage": page,
+            "pagesCount": pagesCount,
+            "douas": douas,
+            "douaCount": douaCount
+        })
+
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+export const getDouasByType = async (req, res) => {
+
+    const page = req.query.page || 1
+    const limit = req.query.limit || 10
+    const skip = (page - 1) * limit
+
+    const douaCount = await Doua.countDocuments()
+    // console.log(douaCount)
+
+    const pagesCount = Math.ceil(douaCount / limit) || 0
+
+    try {
+        const douas = await Doua.find({type:req.body.type}, { dID: 1, name: 1, arabic: 1, english: 1, voice: 1, type: 1 }).skip(skip).limit(limit) // Skip the specified number of documents.limit(limit);;
         res.status(200).json({
             "currentPage": page,
             "pagesCount": pagesCount,
@@ -133,6 +160,7 @@ export const addDoua = async (req, res) => {
         await newDouaVoice.save();
         // let cryptedPassword = req.body.password  
         const arabicWithoutTashkit = removeDiacritics(req.body.arabic)
+        //console.log(arabicWithoutTashkit)
         const newDoua = new Doua({
             dID: req.body.number,
             type: req.body.type,

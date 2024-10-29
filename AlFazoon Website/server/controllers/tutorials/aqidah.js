@@ -14,13 +14,13 @@ export const searchAqidah = async (req, res) => {
 
     try {
         const searchWord = req.body.searchWord || "";
-        let hID = Number(req.body.searchWord) || -1;
+        let aID = Number(req.body.searchWord) || -1;
         // Initialize an empty array for query conditions
         const queryConditions = [];
-
+        console.log(searchWord,(!isNaN(aID) && aID != -1))
         // Check if hID is a valid number
-        if (!isNaN(hID) && hID != -1) {  // hID should be a positive number
-            queryConditions.push({ hID: hID });
+        if (!isNaN(aID) && aID != -1) {  // hID should be a positive number
+            queryConditions.push({ aID: aID });
         } else if (searchWord) {
             queryConditions.push({ arabic: { $regex: new RegExp(searchWord, 'i') } });
             queryConditions.push({ arabicWithoutTashkit: { $regex: searchWord, $options: 'i' } });
@@ -29,7 +29,7 @@ export const searchAqidah = async (req, res) => {
             queryConditions.push({ nothing: 0 });
         }
 
-
+        console.log(queryConditions)
 
 
         const aqidahs = await Aqidah.find(

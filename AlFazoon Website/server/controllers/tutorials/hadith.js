@@ -118,6 +118,7 @@ export const addHadith = async (req, res) => {
         await newHadithVoice.save();
 
         const arabicWithoutTashkit = removeDiacritics(req.body.arabic)
+        console.log(arabicWithoutTashkit)
         // let cryptedPassword = req.body.password  
         const newHadith = new Hadith({
             hID: req.body.number,
