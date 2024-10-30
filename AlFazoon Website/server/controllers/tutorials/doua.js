@@ -122,7 +122,7 @@ export const getDouasByType = async (req, res) => {
     const pagesCount = Math.ceil(douaCount / limit) || 0
 
     try {
-        const douas = await Doua.find({type:req.body.type}, { dID: 1, name: 1, arabic: 1, english: 1, voice: 1, type: 1 }).skip(skip).limit(limit) // Skip the specified number of documents.limit(limit);;
+        const douas = await Doua.find({ type: req.body.type }, { dID: 1, name: 1, arabic: 1, english: 1, voice: 1, type: 1 }).skip(skip).limit(limit) // Skip the specified number of documents.limit(limit);;
         res.status(200).json({
             "currentPage": page,
             "pagesCount": pagesCount,
@@ -160,7 +160,8 @@ export const addDoua = async (req, res) => {
         await newDouaVoice.save();
         // let cryptedPassword = req.body.password  
         const arabicWithoutTashkit = removeDiacritics(req.body.arabic)
-        //console.log(arabicWithoutTashkit)
+
+
         const newDoua = new Doua({
             dID: req.body.number,
             type: req.body.type,

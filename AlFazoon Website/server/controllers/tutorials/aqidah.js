@@ -17,7 +17,6 @@ export const searchAqidah = async (req, res) => {
         let aID = Number(req.body.searchWord) || -1;
         // Initialize an empty array for query conditions
         const queryConditions = [];
-        console.log(searchWord,(!isNaN(aID) && aID != -1))
         // Check if hID is a valid number
         if (!isNaN(aID) && aID != -1) {  // hID should be a positive number
             queryConditions.push({ aID: aID });
@@ -162,7 +161,7 @@ export const updateAqidah = async (req, res) => {
             const duration = metadata.format?.duration || 0;
 
             oldAqidahVoicePath = oldVoice.path
-           // console.log(oldVoice)
+            // console.log(oldVoice)
 
             voiceData = {
                 filename: req.file.filename,
@@ -184,7 +183,7 @@ export const updateAqidah = async (req, res) => {
 
 
 
-        const arabicWithoutTashkit = removeDiacritics(req.body.arabic||"")
+        const arabicWithoutTashkit = removeDiacritics(req.body.arabic || "")
 
         const updatedAqidah = await Aqidah.findByIdAndUpdate(
             req.params.id,
@@ -244,8 +243,7 @@ export const deleteAqidah = async (req, res) => {
 export const getTotalAqidahCount = async (req, res) => {
     try {
         const count = await Aqidah.countDocuments();
-        const aqidahs = await Aqidah.find().populate().select('aID arabic voice type')
-        res.status(200).json({ aqidahs });
+        res.status(200).json({ count });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
