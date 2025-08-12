@@ -16,9 +16,14 @@ const aqidahSchema = new Schema({
     arabic: { type: String, required: true },
     arabicWithoutTashkit: { type: String, required: true },
     english: { type: String, required: true },
+
+    arabicA: { type: String, required: true },
+    arabicAWithoutTashkit: { type: String, required: true },
+    englishA: { type: String, required: true },
+
     voice: { type: mongoose.Schema.Types.ObjectId, ref: 'AqidahVoice', required: true },
-   // type:{ type: String, required: true },
-    name:{ type: String, required: false },
+    // type:{ type: String, required: true },
+    name: { type: String, required: false },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
 });

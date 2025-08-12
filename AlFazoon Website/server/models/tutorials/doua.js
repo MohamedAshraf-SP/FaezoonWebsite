@@ -12,8 +12,9 @@ const douaVoiceSchema = new Schema({
 export const DouaVoice = mongoose.model('DouaVoice', douaVoiceSchema);
 // create schema
 const douaSchema = new Schema({
-    dID: { type: Number, required: true, unique: true },
-    name: { type: String},
+    dID: { type: Number, required: true },
+
+    name: { type: String },
     arabic: { type: String, required: true },
     arabicWithoutTashkit: { type: String, required: true },
     english: { type: String, required: true },

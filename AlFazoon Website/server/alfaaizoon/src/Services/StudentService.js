@@ -1,21 +1,18 @@
 import axios from "axios";
-import { config } from "./../../config";
+const api = import.meta.env.VITE_REACT_APP_HOST;
+const Port = import.meta.env.VITE_REACT_APP_PORT;
 // Get all students
 export const getStudents = async () => {
   try {
-    const response = await axios.get(`${config.REACT_APP_HOST}:${config.REACT_APP_PORT}/api/v1/Students`);
+    const response = await axios.get(`${api}:${Port}/api/v1/Students`);
     return response.data; // Assuming response.data contains the list of students
-  } catch (error) {
-    // console.error("Failed to fetch students:", error.data); // Use console.error for errors
-    // throw error; // Rethrow error to handle it in the calling function if needed
-  }
+  } catch (error) {}
 };
 // Add student
-
 export const addStudent = async (newData) => {
   try {
     const response = await axios.post(
-      `${config.REACT_APP_HOST}:${config.REACT_APP_PORT}/api/v1/Student`, // Adjust your API endpoint
+      `${api}:${Port}/api/v1/Students`, // Adjust your API endpoint
       newData,
       {
         headers: {
@@ -23,8 +20,7 @@ export const addStudent = async (newData) => {
         },
       }
     );
-    // console.log("Response:", response.data);
-    return { success: true, data: response.data }; // Return success
+    return response;
   } catch (error) {
     // console.error("Error:", error.response?.data || error.message);
     return {
@@ -38,10 +34,10 @@ export const addStudent = async (newData) => {
 export const editStudent = async (studentId, updatedData) => {
   try {
     const response = await axios.put(
-      `${config.REACT_APP_HOST}:${config.REACT_APP_PORT}/api/v1/Student/${studentId}`,
+      `${api}:${Port}/api/v1/Students/${studentId}`,
       updatedData
     );
-    getStudents();
+    return response.data;
   } catch (error) {
     // console.log(error);
   }
@@ -51,7 +47,7 @@ export const editStudent = async (studentId, updatedData) => {
 export const deleteStudent = async (studentId) => {
   try {
     const response = await axios.delete(
-     `${config.REACT_APP_HOST}:${config.REACT_APP_PORT}/api/v1/Student/${studentId}`
+      `${api}:${Port}/api/v1/Students/${studentId}`
     );
     return response.data;
   } catch (error) {
@@ -62,12 +58,7 @@ export const deleteStudent = async (studentId) => {
 // start get all Students Count
 export const getStudentsCount = async () => {
   try {
-    const response = await axios.get(
-      `${config.REACT_APP_HOST}:${config.REACT_APP_PORT}/api/v1/Students/Count`
-    );
+    const response = await axios.get(`${api}:${Port}/api/v1/Students/Count`);
     return response.data; // Assuming response.data contains the list of students
-  } catch (error) {
-    // console.error("Failed to fetch students:", error.data); // Use console.error for errors
-    // throw error; // Rethrow error to handle it in the calling function if needed
-  }
+  } catch (error) {}
 };

@@ -4,10 +4,15 @@ import { FaCheck } from "react-icons/fa6";
 function PopUpMassage({ children }) {
   const [Pop_up_Massage, showPop_up_Massage] = useState(false);
   useEffect(() => {
-    showPop_up_Massage(true);
-    setTimeout(() => {
+    // Reset popup state and show it immediately when the message changes
+    showPop_up_Massage(false); // hide immediately
+    setTimeout(() => showPop_up_Massage(true), 10); // delay to re-trigger animation
+
+    const timer = setTimeout(() => {
       showPop_up_Massage(false);
-    }, 2000);
+    }, 3000);
+
+    return () => clearTimeout(timer);
   }, [children]);
   return (
     <div
@@ -18,7 +23,7 @@ function PopUpMassage({ children }) {
       {children && (
         <div className="flex flex-row items-center gap-2">
           <FaCheck className="font-semibold" />
-          <p className="font-medium text-[15px]">{children}</p>
+          <p className="font-semibold  text-[16px] ">{children}</p>
         </div>
       )}
     </div>

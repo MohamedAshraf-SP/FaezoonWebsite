@@ -1,8 +1,5 @@
 import Teacher from "./../models/teachers.js"; // Import the Teacher model
 
-
-
-
 // Get a teacher by ID
 export const getTeacher = async (req, res) => {
   try {
@@ -19,7 +16,7 @@ export const getTeacher = async (req, res) => {
 // Get all teachers
 export const getTeachers = async (req, res) => {
   try {
-    const teachers = await Teacher.find({ role: 'user' });
+    const teachers = await Teacher.find({ role: "user" });
     res.status(200).json(teachers);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -88,7 +85,7 @@ export const updateTeacher = async (req, res) => {
 // Get the number of teachers
 export const getTeachersCount = async (req, res) => {
   try {
-    const count = await Teacher.countDocuments() - 1;
+    const count = (await Teacher.countDocuments()) - 1;
     res.status(200).json({ count });
   } catch (error) {
     res.status(500).json({ error: error.message });
