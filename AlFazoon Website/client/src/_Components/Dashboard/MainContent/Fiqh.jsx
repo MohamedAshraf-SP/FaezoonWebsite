@@ -6,6 +6,7 @@ import { addNewItem, getItem } from "../../../Services/TutorialService";
 import PopUpMassage from "../../PopUpMassage";
 import { CiSearch } from "react-icons/ci";
 import PopUp from "../../PopUp";
+
 import { useDispatch } from "react-redux";
 import { updateData } from "../../../Rtk/slices/updataDataSlice";
 
@@ -261,8 +262,8 @@ export default function Fiqh() {
             <button
               type="submit"
               className={`inline-block rounded-md lg:px-12 px-4 py-3 text-sm font-medium transition focus:outline-none focus:ring ${!formik.isValid
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-600 text-white hover:bg-blue-700"
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-600 text-white hover:bg-blue-700"
                 }`}
               disabled={!formik.isValid || formik.isSubmitting}
             >
