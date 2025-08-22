@@ -1,15 +1,15 @@
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
-import { useNavigate } from "react-router-dom";
-import { config } from "./../../config";
+
+const api = import.meta.env.VITE_API_URL;
 const useLogin = () => {
-  const navigate = useNavigate();
+console.log('api is ',api)
 
   const VerifyLogin = (UserData) => {
     return new Promise((resolve, reject) => {
       axios
         .post(
-          `${config.REACT_APP_HOST}:${config.REACT_APP_PORT}/api/v1/login`,
+          `${api}/login`,
           UserData,
           {
             headers: {
@@ -21,10 +21,7 @@ const useLogin = () => {
           if (response.status === 200) {
             const decodedToken = jwtDecode(response.data.token);
             localStorage.setItem("token", JSON.stringify(decodedToken));
-            localStorage.setItem("Maintoken", response.data.token); // Store token as a string, not JSON
-            // console.log("Token stored:", localStorage.getItem("Maintoken"));
 
-            // Force re-fetch or re-render
             if (decodedToken.role === "admin") {
               resolve("admin");
               // navigate("/Dashboard"); // Resolve the promise for an admin role
@@ -49,7 +46,7 @@ const useLogin = () => {
 export const LoginFunc = async (loginData) => {
   try {
     const response = await axios.post(
-      `${config.REACT_APP_HOST}:${config.REACT_APP_PORT}/api/v1/login`,
+      `${api}/login`,
       loginData,
       {
         headers: {

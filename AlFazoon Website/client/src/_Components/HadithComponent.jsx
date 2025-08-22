@@ -8,9 +8,10 @@ export default function HadithComponent({
   hadithNumber,
   hadithArabic,
   hadithEnglish,
-  HaIdithId,    
+  HaIdithId,
   isPlaying,
   onPlayAudio,
+  enpoint
 }) {
   const api = import.meta.env.VITE_API_UPLOADS_URL;
   const [hadithVoice, setHadithVoice] = useState(null);
@@ -20,7 +21,7 @@ export default function HadithComponent({
     if (hadithVoice) return; // Already fetched
     setLoading(true);
     try {
-      const data = await getItem("hadiths", HaIdithId);
+      const data = await getItem(enpoint, HaIdithId);
       setHadithVoice(data.voice.path);
     } catch (error) {
       console.error("Failed to fetch hadith audio:", error);
@@ -65,9 +66,8 @@ export default function HadithComponent({
           </audio>
         ) : (
           <div
-            className={`bg-[#005a8c] text-[#FFFFFF] px-[20px] py-[5px] text-right rounded-[5px] font-semibold text-lg flex flex-row items-center justify-end gap-2 cursor-pointer hover:bg-[#343746] transition-all ease-in-out duration-300 ${
-              loading ? "opacity-50" : ""
-            }`}
+            className={`bg-[#005a8c] text-[#FFFFFF] px-[20px] py-[5px] text-right rounded-[5px] font-semibold text-lg flex flex-row items-center justify-end gap-2 cursor-pointer hover:bg-[#343746] transition-all ease-in-out duration-300 ${loading ? "opacity-50" : ""
+              }`}
             onClick={handleAudioClick}
             disabled={loading}
           >

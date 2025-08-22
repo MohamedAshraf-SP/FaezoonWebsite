@@ -10,6 +10,10 @@ import Cread from "./MainContent/Cread";
 import Douaa from "./MainContent/Douaa";
 import Nawwai from "./MainContent/40Nawwai";
 import Azkar from "./MainContent/Azkar";
+import Tawheed from "./MainContent/Tawheed";
+import Fiqh from "./MainContent/Fiqh";
+import ProphtStories from "./MainContent/ProphtStories";
+import CompanionsStories from "./MainContent/CompanionsStories";
 
 export default function Main_content({ selectedSection, ToggleSideBar }) {
   const [Loader, showLoader] = useState(false);
@@ -53,6 +57,10 @@ export default function Main_content({ selectedSection, ToggleSideBar }) {
       {selectedSection == "Azkar" && <Azkar />}
       {selectedSection == "Duaa" && <Douaa />}
       {selectedSection == "40 Nawawi" && <Nawwai />}
+      {selectedSection == "Fiqh" && <Fiqh />}
+      {selectedSection == "Tawheed" && <Tawheed />}
+      {selectedSection == "Propht Stories" && <ProphtStories />}
+      {selectedSection == "Companions Stories" && <CompanionsStories />}
     </>
   );
 }

@@ -1,16 +1,17 @@
-import Salwat from "/images/Hadith/salawat.png";
+import Salwat from "/images/cread/allah1.png";
 import { useFormik } from "formik";
 import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import { addNewItem, getItem } from "../../../Services/TutorialService";
 import PopUpMassage from "../../PopUpMassage";
-import { CiSearch } from "react-icons/ci"; // Import the search icon
+import { CiSearch } from "react-icons/ci";
 import PopUp from "../../PopUp";
+
 import { useDispatch } from "react-redux";
 import { updateData } from "../../../Rtk/slices/updataDataSlice";
-import { join } from "lodash";
 
-export default function Hadith() {
+
+export default function Fiqh() {
   const dispatch = useDispatch();
   const [popUpmsg, setpopUpmsg] = useState(false);
   const [actionmsg, setactionmsg] = useState("");
@@ -24,35 +25,35 @@ export default function Hadith() {
     setSearchForm((prev) => !prev);
   };
 
-  // add new Hadith
-  const addHadith = async (Item, path) => {
+  // add new Fiqh
+  const addFiqh = async (Item, path) => {
     try {
       const response = await addNewItem(Item, path);
-      setactionmsg("تم إضافة حديث جديد");
+      setactionmsg("تم إضافة عنصر جديد");
       setpopUpmsg(true);
 
       setTimeout(() => setpopUpmsg(false), 3000);
     } catch (error) {
       // Set the error state if an error occurs
-      setactionmsg("ادخل رقم مختلف للحديث");
+      setactionmsg("ادخل رقم مختلف للعنصر");
       setpopUpmsg(true);
       setTimeout(() => setpopUpmsg(false), 3000);
     }
   };
 
-  // edit hadith
+  // edit Fiqh
   const getSelectedItemId = (itemId, Item) => {
     setselectedHaditnumber(itemId);
     setisEdit(true);
     formik.voice = Item.voice;
     formik.setValues(Item);
   };
-  // get hadith voice while click update
+  // get Fiqh voice while click update
   useEffect(() => {
     const getVoice = async () => {
       if (isEdit && selectedHaditnumber) {
         try {
-          const fetchedItem = await getItem("hadiths", selectedHaditnumber);
+          const fetchedItem = await getItem("feqhs", selectedHaditnumber);
 
           if (fetchedItem.voice.path) {
             const audioUrl = `${fetchedItem.voice.path
@@ -69,7 +70,7 @@ export default function Hadith() {
     };
     getVoice();
   }, [isEdit, selectedHaditnumber]);
-  // Hadith Form
+  // Fiqh Form
   const formik = useFormik({
     initialValues: {
       hID: "",
@@ -79,10 +80,10 @@ export default function Hadith() {
     },
     validationSchema: Yup.object({
       hID: Yup.number()
-        .min(0, "Hadith Number can't be less than 0")
-        .required("Number of Hadith is required"),
-      english: Yup.string().required("Hadith in English is required"),
-      arabic: Yup.string().required("Hadith in Arabic is required"),
+        .min(0, "Fiqh Number can't be less than 0")
+        .required("Number of Fiqh is required"),
+      english: Yup.string().required("Fiqh in English is required"),
+      arabic: Yup.string().required("Fiqh in Arabic is required"),
       voice: Yup.mixed().required("An audio file is required"),
     }),
     onSubmit: (values, { resetForm }) => {
@@ -94,7 +95,7 @@ export default function Hadith() {
       if (isEdit) {
         dispatch(
           updateData({
-            path: "hadiths",
+            path: "feqhs",
             itemId: selectedHaditnumber,
             updatedItem: formData,
           })
@@ -102,7 +103,7 @@ export default function Hadith() {
         setisEdit(false);
         setselectedHaditnumber(null);
       } else {
-        addHadith(formData, "hadiths");
+        addFiqh(formData, "feqhs");
       }
       setExistingAudioFilename(null);
       resetForm();
@@ -120,7 +121,7 @@ export default function Hadith() {
       {serchForm && (
         <PopUp
           toggleshowPopup={ShowSearchForm}
-          path={"hadiths"}
+          path={"feqhs"}
           getSelectedItemId={getSelectedItemId}
         />
       )}
@@ -133,7 +134,7 @@ export default function Hadith() {
       <div className="flex lg:flex-row flex-col lg:items-start items-center justify-between bg-[rgb(235,240,255)] bg-[linear-gradient(90deg,_rgba(235,240,255,0.9976365546218487)_12%,_rgba(249,251,255,1)_69%)] px-6 overflow-numberden h-fit rounded-lg">
         <div className="lg:pt-6 py-2 flex flex-row items-center">
           <h2 className="text-[#202936] font-semibold font-sans lg:text-2xl text-xl">
-            Hadith
+            Fiqh
           </h2>
           <button
             className="ml-4 text-[15px] text-[#94a3b8] bg-[#fefeffe1]  text-left   border border-solid border-[#e5e7eb] flex flex-row justify-start lg:pr-20 px-6  lg:pl-3 gap-2 py-1 tracking-wide outline-none   rounded-md hover:border-[#bebebe] transition-all duration-300 ease-in-out items-center "
@@ -147,24 +148,24 @@ export default function Hadith() {
         </div>
       </div>
 
-      {/* Hadith Form */}
+      {/* Fiqh Form */}
       <div className="mt-6 rounded-md border border-solid border-neutral-200">
         <div className="text-xl font-medium py-4 px-4 text-[#202936] border-b border-solid border-[#dfe5efcc] bg-[#ebf0ff48]">
-          <h3>{isEdit ? "Update Hadith" : "Add New Hadith"}</h3>
+          <h3>{isEdit ? "Update Fiqh" : "Add New Fiqh"}</h3>
         </div>
         <form
           className="mt-8 grid grid-cols-12 gap-6 px-4 pb-4"
           onSubmit={formik.handleSubmit}
         >
-          {/* Hadith Number */}
+          {/* Fiqh Number */}
           <div className="md:col-span-6 col-span-12">
             <label className="Dashboardlabel" htmlFor="number">
-              Hadith Number
+              Fiqh Number
             </label>
             <input
               type="number"
               name="hID"
-              placeholder="Hadith Number"
+              placeholder="Fiqh Number"
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               value={formik.values.hID}
@@ -213,12 +214,12 @@ export default function Hadith() {
           {/* Hadith In Arabic */}
           <div className="md:col-span-6 col-span-12">
             <label className="Dashboardlabel" htmlFor="arabic">
-              Hadith In Arabic
+              Fiqh In Arabic
             </label>
             <textarea
               id="arabic"
               name="arabic"
-              placeholder="أدخل الحديث باللغه العربيه"
+              placeholder="أدخل العنصر باللغه العربيه"
               dir="rtl"
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
@@ -236,12 +237,12 @@ export default function Hadith() {
           {/* Hadith In English */}
           <div className="md:col-span-6 col-span-12">
             <label className="Dashboardlabel" htmlFor="english">
-              Hadith In English
+              Fiqh In English
             </label>
             <textarea
               id="english"
               name="english"
-              placeholder="Enter Hadith In English"
+              placeholder="Enter Fiqh In English"
               dir="ltr"
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
@@ -261,12 +262,12 @@ export default function Hadith() {
             <button
               type="submit"
               className={`inline-block rounded-md lg:px-12 px-4 py-3 text-sm font-medium transition focus:outline-none focus:ring ${!formik.isValid
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-600 text-white hover:bg-blue-700"
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-600 text-white hover:bg-blue-700"
                 }`}
               disabled={!formik.isValid || formik.isSubmitting}
             >
-              {isEdit ? "Update Hadith" : "Add Hadith"}
+              {isEdit ? "Update Fiqh" : "Add Fiqh"}
             </button>
           </div>
         </form>

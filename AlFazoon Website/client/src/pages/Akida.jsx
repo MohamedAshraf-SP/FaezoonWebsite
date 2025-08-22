@@ -56,19 +56,24 @@ export default function Akida() {
 
   // Load Categories with Counts
   const categoryNames = [
-    "hadiths",
-    "azkars",
-    "aqidahs",
-    "douas",
-    "arboonNawwis",
+
+    { name: "Hadiths", endpoint: "hadiths" },
+    { name: "Aqidah", endpoint: "aqidahs" },
+    { name: "Azkar", endpoint: "azkars" },
+    { name: "Dua", endpoint: "douas" },
+    { name: "Fiqh", endpoint: "feqhs" },
+    { name: "Tawheed", endpoint: "Tawheeds" },
+    { name: "Arbaeen Nawawi", endpoint: "arboonNawwis" },
+    { name: "Prophet Stories", endpoint: "anbiaaStories" },
+    { name: "Companions Stories", endpoint: "sahabaaStories" },
   ];
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchcategoryData = async () => {
       try {
         const categoryData = await Promise.all(
           categoryNames.map(async (category) => {
-            const count = await getCount(category);
-            return { name: category, count, link: category };
+            const count = await getCount(category.endpoint);
+            return { name: category.name, count, link: category };
           })
         );
         setCategories(categoryData);
@@ -76,9 +81,8 @@ export default function Akida() {
         console.log(error);
       }
     };
-    fetchData();
+    fetchcategoryData();
   }, []);
-
   // Fetch Hadith data based on current page
   useEffect(() => {
     dispatch(fetchData(`aqidahs/?limit=${loadLimit}&page=${currentPage}`));

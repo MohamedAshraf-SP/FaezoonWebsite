@@ -424,11 +424,10 @@ export default function Teachers() {
                 type="submit"
                 disabled={!formik.isValid || formik.isSubmitting}
                 className={`inline-block rounded-md lg:px-12 px-4 py-3 text-sm font-medium transition focus:outline-none focus:ring 
-                      ${
-                        !formik.isValid
-                          ? "bg-gray-400 cursor-not-allowed"
-                          : "bg-blue-600 text-white hover:bg-blue-700"
-                      }`}
+                      ${!formik.isValid
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-600 text-white hover:bg-blue-700"
+                  }`}
               >
                 {isEdit ? "Updat Teacher" : "Add Teacher"}
               </button>
@@ -440,7 +439,7 @@ export default function Teachers() {
         <div className="relative overflow-x-auto shadow-md sm:rounded-lg mt-14 h-[500px] ">
           {Teachers?.length > 0 ? (
             <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-              <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 ">
+              <thead className="text-[13px] text-gray-300 capitalize bg-gray-50 dark:bg-gray-600 dark:text-gray-300 ">
                 <tr>
                   <th scope="col" className="px-2 py-3 font-sans">
                     Teacher name
@@ -486,12 +485,11 @@ export default function Teachers() {
               <tbody>
                 {Teachers?.map((teacher) => (
                   <tr
-                    className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 text-md "
-                    key={teacher._id}
+                    className="  border-b dark:bg-gray-600 text-white text-md " key={teacher._id}
                   >
                     <th
                       scope="row"
-                      className="px-2 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                      className="px-2 py-4 font-medium text-gray-300 whitespace-nowrap dark:text-white"
                     >
                       {teacher.firstName} {teacher.middleName}{" "}
                       {teacher.lastName}

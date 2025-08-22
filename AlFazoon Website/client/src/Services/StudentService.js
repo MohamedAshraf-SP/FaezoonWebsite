@@ -1,10 +1,9 @@
 import axios from "axios";
-const api = import.meta.env.VITE_REACT_APP_HOST;
-const Port = import.meta.env.VITE_REACT_APP_PORT;
+const api = import.meta.env.VITE_API_URL;
 // Get all students
 export const getStudents = async () => {
   try {
-    const response = await axios.get(`${api}:${Port}/api/v1/Students`);
+    const response = await axios.get(`${api}/Students`);
     return response.data; // Assuming response.data contains the list of students
   } catch (error) {}
 };
@@ -12,7 +11,7 @@ export const getStudents = async () => {
 export const addStudent = async (newData) => {
   try {
     const response = await axios.post(
-      `${api}:${Port}/api/v1/Students`, // Adjust your API endpoint
+      `${api}/Students`, // Adjust your API endpoint
       newData,
       {
         headers: {
@@ -34,7 +33,7 @@ export const addStudent = async (newData) => {
 export const editStudent = async (studentId, updatedData) => {
   try {
     const response = await axios.put(
-      `${api}:${Port}/api/v1/Students/${studentId}`,
+      `${api}/Students/${studentId}`,
       updatedData
     );
     return response.data;
@@ -47,7 +46,7 @@ export const editStudent = async (studentId, updatedData) => {
 export const deleteStudent = async (studentId) => {
   try {
     const response = await axios.delete(
-      `${api}:${Port}/api/v1/Students/${studentId}`
+      `${api}/Students/${studentId}`
     );
     return response.data;
   } catch (error) {
@@ -58,7 +57,7 @@ export const deleteStudent = async (studentId) => {
 // start get all Students Count
 export const getStudentsCount = async () => {
   try {
-    const response = await axios.get(`${api}:${Port}/api/v1/Students/Count`);
+    const response = await axios.get(`${api}/Students/Count`);
     return response.data; // Assuming response.data contains the list of students
   } catch (error) {}
 };

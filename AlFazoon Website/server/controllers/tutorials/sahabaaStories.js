@@ -88,7 +88,7 @@ export const getSahabaaStoriess = async (req, res) => {
     res.status(200).json({
       currentPage: page,
       pagesCount: pagesCount,
-      sahabaaStoriess: sahabaaStoriess,
+      sahabaaStories: sahabaaStoriess,
       sahabaaStoriesCount: sahabaaStoriesCount,
     });
   } catch (error) {
