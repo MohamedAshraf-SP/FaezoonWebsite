@@ -24,8 +24,11 @@ const AzkarComp = lazy(() => import("./pages/Azkar"));
 const DouaaComp = lazy(() => import("./pages/DouaaCategory"));
 const DuaaCategory = lazy(() => import("./pages/DuaaCategoryDisplaying"));
 const ArboonNawwaiComp = lazy(() => import("./pages/ArboonNawwai"));
+const ProphetStories = lazy(() => import("./pages/ProphetStories"));
+const CompanionsStories = lazy(() => import("./pages/CompanionsStories"));
+const Fiqh = lazy(() => import("./pages/Fiqh"));
+const Tawheed = lazy(() => import("./pages/Tawheed"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
-
 const NotFundPage = lazy(() => import("./pages/NotFind"));
 const withSusspense = (Component) => (
   <Suspense fallback={<Overlay title={"Loading..."} />}>
@@ -60,6 +63,14 @@ function App() {
           element: withSusspense(DouaaComp),
         },
         {
+          path: "Fiqh",
+          element: withSusspense(Fiqh),
+        },
+        {
+          path: "Tawheed",
+          element: withSusspense(Tawheed),
+        },
+        {
           path: "douas/:categoryName",
           element: withSusspense(DuaaCategory),
         },
@@ -67,9 +78,16 @@ function App() {
           path: "arboonNawwis",
           element: withSusspense(ArboonNawwaiComp),
         },
+        {
+          path: "ProphetStories",
+          element: withSusspense(ProphetStories),
+        },
+        {
+          path: "CompanionsStories",
+          element: withSusspense(CompanionsStories),
+        },
       ],
     },
-    // end tutorial route
     {
       path: "Dashboard",
       element: (

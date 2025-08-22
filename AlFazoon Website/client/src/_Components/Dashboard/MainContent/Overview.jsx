@@ -1,6 +1,7 @@
 import studentImg from "/images/Overview/students.webp";
 import TeacgerImg from "/images/Overview/teachers.webp";
 import creadImg from "/images/Overview/cread.webp";
+import tawheedImg from "/images/Overview/tawheed.jpg";
 
 import DuasImg from "/images/Overview/duas.webp";
 import HadithImg from "/images/Overview/hadith.webp";
@@ -16,11 +17,16 @@ export default function Overview() {
   const [Teachers, setTeachersCount] = useState(null);
   const [Students, setStudentsCount] = useState(null);
   const categoryNames = [
-    { name: "hadiths", img: HadithImg },
-    { name: "azkars", img: AzkarImg },
-    { name: "douas", img: DuasImg },
-    { name: "arboonNawwis", img: NawawiImg },
-    { name: "aqidahs", img: creadImg },
+    { endpoint: 'hadiths', name: "hadith", img: HadithImg },
+    { endpoint: 'azkars', name: "azkar", img: AzkarImg },
+    { endpoint: 'douas', name: "doua", img: DuasImg },
+    { endpoint: 'arboonNawwis', name: "arboon Nawwi", img: NawawiImg },
+    { endpoint: 'aqidahs', name: "aqidah", img: creadImg },
+    { endpoint: 'tawheeds', name: "tawheed", img: tawheedImg },
+    { endpoint: 'feqhs', name: "fiqh", img: creadImg },
+    { endpoint: 'arboonNawwis', name: "Prophet Stories", img: NawawiImg },
+    { endpoint: 'sahabaaStories', name: "Companions Stories", img: NawawiImg },
+
   ];
   const OtherFields = [
     {
@@ -35,7 +41,7 @@ export default function Overview() {
       try {
         const categoryData = await Promise.all(
           categoryNames?.map(async (category) => {
-            const count = await getCount(category.name);
+            const count = await getCount(category.endpoint);
             return {
               name: category.name,
               count,
@@ -50,7 +56,7 @@ export default function Overview() {
     };
     fetchData();
   }, []);
-  
+
   useEffect(() => {
     const fetchCounts = async () => {
       try {

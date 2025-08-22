@@ -402,11 +402,10 @@ export default function Students() {
                 type="submit"
                 disabled={!formik.isValid || formik.isSubmitting}
                 className={`inline-block rounded-md lg:px-12 px-4 py-3 text-sm font-medium transition focus:outline-none focus:ring 
-                      ${
-                        !formik.isValid
-                          ? "bg-gray-400 cursor-not-allowed"
-                          : "bg-blue-600 text-white hover:bg-blue-700"
-                      }`}
+                      ${!formik.isValid
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-600 text-white hover:bg-blue-700"
+                  }`}
               >
                 {isEdit ? "Update Student" : "Add Student"}
               </button>
@@ -415,10 +414,10 @@ export default function Students() {
         </div>
         {/* start display Students */}
 
-        <div className="relative overflow-x-auto shadow-md sm:rounded-lg mt-14   h-[500px]">
+        <div className="relative overflow-x-auto  sm:rounded-lg mt-14  overflow-y-auto  h-[500px]">
           {Students?.length > 0 ? (
             <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 ">
-              <thead className="text-[13px] text-gray-700 capitalize bg-gray-50 dark:bg-gray-700 dark:text-gray-400 ">
+              <thead className="text-[13px] text-gray-300 capitalize bg-gray-50 dark:bg-gray-600 dark:text-gray-300 ">
                 <tr>
                   <th scope="col" className="px-2 py-3 font-sans">
                     student Name
@@ -468,12 +467,12 @@ export default function Students() {
               <tbody>
                 {Students?.map((Student) => (
                   <tr
-                    className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 text-md "
+                    className="  border-b dark:bg-gray-600 text-white text-md "
                     key={Student._id}
                   >
                     <th
                       scope="row"
-                      className="px-2 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                      className="px-2 py-4 font-medium text-gray-300 whitespace-nowrap dark:text-white"
                     >
                       {Student.firstName} {Student.middleName}{" "}
                       {Student.lastName}

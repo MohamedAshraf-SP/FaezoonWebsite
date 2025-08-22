@@ -57,19 +57,26 @@ export default function Hadith() {
 
   // Load Categories with Counts
   const categoryNames = [
-    "hadiths",
-    "azkars",
-    "aqidahs",
-    "douas",
-    "arboonNawwis",
+
+    { name: "Hadiths", endpoint: "hadiths" },
+    { name: "Aqidah", endpoint: "aqidahs" },
+    { name: "Azkar", endpoint: "azkars" },
+    { name: "Dua", endpoint: "douas" },
+    { name: "Fiqh", endpoint: "feqhs" },
+    { name: "Tawheed", endpoint: "Tawheeds" },
+    { name: "Arbaeen Nawawi", endpoint: "arboonNawwis" },
+    { name: "Prophet Stories", endpoint: "anbiaaStories" },
+    { name: "Companions Stories", endpoint: "sahabaaStories" },
   ];
+
+
   useEffect(() => {
     const fetchcategoryData = async () => {
       try {
         const categoryData = await Promise.all(
           categoryNames.map(async (category) => {
-            const count = await getCount(category);
-            return { name: category, count, link: category };
+            const count = await getCount(category.endpoint);
+            return { name: category.name, count, link: category };
           })
         );
         setCategories(categoryData);
@@ -79,7 +86,6 @@ export default function Hadith() {
     };
     fetchcategoryData();
   }, []);
-
   // Fetch Hadith data based on current page
   useEffect(() => {
     dispatch(fetchData(`hadiths/?limit=${loadLimit}&page=${currentPage}`));
@@ -124,7 +130,7 @@ export default function Hadith() {
                         HaIdithId={hadith._id}
                         isPlaying={playingId === hadith._id}
                         onPlayAudio={handlePlayAudio}
-                      />
+                        enpoint="hadiths" />
                     ))}
                   </div>
                 )}
@@ -167,6 +173,7 @@ export default function Hadith() {
                         HaIdithId={hadith._id}
                         isPlaying={playingId === hadith._id}
                         onPlayAudio={handlePlayAudio}
+                        enpoint="hadiths"
                       />
                     ))}
                   </div>

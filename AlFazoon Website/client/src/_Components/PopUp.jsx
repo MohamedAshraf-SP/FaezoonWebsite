@@ -30,7 +30,7 @@ export default function PopUp({ toggleshowPopup, path, getSelectedItemId }) {
   const popupRef = useRef(null);
   // get selected item id
   const handleItemClick = (itemId, item) => {
- 
+
     getSelectedItemId(itemId, item);
     toggleshowPopup();
   };
@@ -41,7 +41,7 @@ export default function PopUp({ toggleshowPopup, path, getSelectedItemId }) {
       debouncedFetch(value);
     }
   };
-
+  console.log('path is ', path)
   // handle search
   const debouncedFetch = _.debounce((searchValue) => {
     dispatch(

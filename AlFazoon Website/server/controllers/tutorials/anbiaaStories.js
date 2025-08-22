@@ -88,7 +88,7 @@ export const getAnbiaaStoriess = async (req, res) => {
     res.status(200).json({
       currentPage: page,
       pagesCount: pagesCount,
-      anbiaaStoriess: anbiaaStoriess,
+      anbiaaStories: anbiaaStoriess,
       anbiaaStoriesCount: anbiaaStoriesCount,
     });
   } catch (error) {

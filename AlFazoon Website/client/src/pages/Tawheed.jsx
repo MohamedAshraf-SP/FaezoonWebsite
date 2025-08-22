@@ -14,11 +14,11 @@ import { getCount } from "../Services/TutorialService";
 import { highlightText } from "../assets/HighlightText";
 import Pagination from "../_Components/Pagination";
 import FixedHeader from "../_Components/FixedHeader";
-export default function Azkar() {
+export default function Fiqh() {
   const dispatch = useDispatch();
   const loadLimit = import.meta.env.VITE_API_LOAD_LIMI;
   const fetchDataStatus = useSelector((state) => state.fetchedData.status);
-  const Allazkar = useSelector((state) => state.fetchedData.results);
+  const AllTawheed = useSelector((state) => state.fetchedData.results);
   const searchStatus = useSelector((state) => state.search.status);
   const searchResult = useSelector((state) => state.search.searchresult);
 
@@ -44,7 +44,7 @@ export default function Azkar() {
 
   const debouncedFetch = _.debounce((searchValue) => {
     dispatch(
-      fetchSearchResult({ path: "/azkars/search", searchWord: searchValue })
+      fetchSearchResult({ path: "/tawheeds/search", searchWord: searchValue })
     );
   }, 300);
 
@@ -53,8 +53,6 @@ export default function Azkar() {
       debouncedFetch.cancel();
     };
   }, []);
-
-  // Load Categories with Counts
   const categoryNames = [
 
     { name: "Hadiths", endpoint: "hadiths" },
@@ -67,7 +65,6 @@ export default function Azkar() {
     { name: "Prophet Stories", endpoint: "anbiaaStories" },
     { name: "Companions Stories", endpoint: "sahabaaStories" },
   ];
-
   useEffect(() => {
     const fetchcategoryData = async () => {
       try {
@@ -86,13 +83,13 @@ export default function Azkar() {
   }, []);
   // Fetch Hadith data based on current page
   useEffect(() => {
-    dispatch(fetchData(`azkars/?limit=${loadLimit}&page=${currentPage}`));
+    dispatch(fetchData(`tawheeds/?limit=${loadLimit}&page=${currentPage}`));
   }, [dispatch, currentPage]);
-
+  console.log('tawheed', AllTawheed)
   return (
     <>
       <NewNavbar />
-      <FixedHeader subtitle={"Adhkir"} />
+      <FixedHeader subtitle={"Tawheed"} />
       <div className="py-10 container">
         <div className="grid grid-cols-12 md:gap-10">
           {/* Main Content */}
@@ -114,12 +111,12 @@ export default function Azkar() {
               {/* Display Search Results */}
               {searchValue &&
                 searchStatus === "Success" &&
-                searchResult.length > 0 && (
+                searchResult?.length > 0 && (
                   <div>
-                    {searchResult.map((hadith) => (
+                    {searchResult?.map((hadith) => (
                       <HadithComponent
                         key={hadith._id}
-                        hadithNumber={hadith.zID}
+                        hadithNumber={hadith.hID}
                         hadithArabic={highlightText(hadith.arabic, searchValue)}
                         hadithEnglish={highlightText(
                           hadith.english,
@@ -128,7 +125,8 @@ export default function Azkar() {
                         HaIdithId={hadith._id}
                         isPlaying={playingId === hadith._id}
                         onPlayAudio={handlePlayAudio}
-                        endpoint="azkars"
+                        enpoint='tawheeds'
+
                       />
                     ))}
                   </div>
@@ -137,7 +135,7 @@ export default function Azkar() {
               {/* No Search Results */}
               {searchValue &&
                 searchStatus === "Success" &&
-                searchResult.length === 0 && (
+                searchResult?.length === 0 && (
                   <div className="lg:w-[360px] lg:h-[360px] mx-auto">
                     <img src={NoDataFounded} alt="No Data Found" />
                     <p className="flex flex-row items-center justify-center text-center text-xl my-2 font-medium py-2">
@@ -161,19 +159,18 @@ export default function Azkar() {
               {/* Display Default Hadiths */}
               {!searchValue &&
                 fetchDataStatus === "success" &&
-                Allazkar?.azkars?.length > 0 && (
+                AllTawheed?.tawheeds?.length > 0 && (
                   <div>
-                    {Allazkar.azkars.map((hadith) => (
+                    {AllTawheed?.tawheeds.map((hadith) => (
                       <HadithComponent
                         key={hadith._id}
-                        hadithNumber={hadith.zID}
+                        hadithNumber={hadith.hID}
                         hadithArabic={hadith.arabic}
                         hadithEnglish={hadith.english}
                         HaIdithId={hadith._id}
                         isPlaying={playingId === hadith._id}
                         onPlayAudio={handlePlayAudio}
-                        endpoint="azkars"
-
+                        enpoint='tawheeds'
                       />
                     ))}
                   </div>
@@ -182,7 +179,7 @@ export default function Azkar() {
               {/* No Hadiths Fetched */}
               {!searchValue &&
                 fetchDataStatus === "success" &&
-                Allazkar?.azkars?.length === 0 && (
+                AllTawheed?.tawheeds?.length === 0 && (
                   <p className="text-center font-medium">
                     No hadiths available.
                   </p>
@@ -191,11 +188,11 @@ export default function Azkar() {
               {/* Pagination */}
               {!searchValue &&
                 fetchDataStatus === "success" &&
-                Allazkar?.azkars?.length > 0 && (
+                AllTawheed?.tawheeds?.length > 0 && (
                   <div className="pt-8 mx-auto">
                     <Pagination
                       currentPage={currentPage}
-                      pagecount={Allazkar?.pagesCount}
+                      pagecount={AllTawheed?.pagesCount}
                       onPageChange={setCurrentPage}
                     />
                   </div>
@@ -218,13 +215,7 @@ export default function Azkar() {
                 <hr className="border-t border-solid border-gray-300 w-full" />
               </h2>
               <p className="font-english leading-relaxed  font-medium text-[16px] text-[#5f6068]">
-                This collection of Azkar (remembrances and supplications) to
-                support daily worship and connection with Allah. From morning
-                and evening supplications to specific prayers for various
-                moments, each Dhikr is chosen to bring peace, mindfulness, and
-                spiritual reflection. Drawn from authentic sources, this guide
-                is designed to help Muslims stay connected to their faith
-                throughout the day.
+                We study Tawheed to strengthen our understanding of the oneness of Allah. It is the foundation of our faith and the key to living a life devoted to Him alone. Through Tawheed, we learn to place our trust fully in Allah, worship Him sincerely, and avoid anything that leads to shirk.
               </p>
             </div>
             <div className="text-center py-8 ">

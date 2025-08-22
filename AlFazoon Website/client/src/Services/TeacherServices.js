@@ -1,12 +1,12 @@
 import axios from "axios";
 
-const api = import.meta.env.VITE_REACT_APP_HOST;
-const Port = import.meta.env.VITE_REACT_APP_PORT;
+const api = import.meta.env.VITE_API_URL;
+ 
 export const GetAllTeachers = async () => {
   try {
     const Token = localStorage.getItem("Maintoken");
     const response = await axios.get(
-      `${api}:${Port}/api/v1/teachers`,
+      `${api}/teachers`,
 
       {
         headers: {
@@ -24,7 +24,7 @@ export const addNewTeacher = async (postData) => {
   const Token = localStorage.getItem("Maintoken");
   try {
     const response = await axios.post(
-      `${api}:${Port}/api/v1/teachers`,
+      `${api}/teachers`,
       postData,
       {
         headers: {
@@ -48,7 +48,7 @@ export const updateTeacher = async (TeacherId, UpdatedData) => {
   const Token = localStorage.getItem("Maintoken");
   try {
     const response = await axios.put(
-      `${api}:${Port}/api/v1/teachers/${TeacherId}`,
+      `${api}/teachers/${TeacherId}`,
       UpdatedData,
       {
         headers: {
@@ -66,7 +66,7 @@ export const DeleteTeacher = async (TeacherId) => {
   try {
     let Token = localStorage.getItem("Maintoken");
     const response = await axios.delete(
-      `${api}:${Port}/api/v1/teachers/${TeacherId}`,
+      `${api}/teachers/${TeacherId}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -88,7 +88,7 @@ export const DeleteTeacher = async (TeacherId) => {
 export const getTeachersCount = async () => {
   const Token = localStorage.getItem("Maintoken");
   try {
-    const response = await axios.get(`${api}:${Port}/api/v1/teachers/count`, {
+    const response = await axios.get(`${api}/teachers/count`, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${Token}`,

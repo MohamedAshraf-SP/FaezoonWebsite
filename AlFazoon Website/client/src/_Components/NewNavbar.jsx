@@ -75,10 +75,9 @@ export default function NewNavbar() {
               <div className="hidden md:flex">
                 <nav aria-label="Global">
                   <ul className="flex items-center gap-8 text-md">
-                    {navbarLinks.map((link, index) => (
-                      <li>
+                    {navbarLinks.map((link) => (
+                      <li key={link.id}>
                         <Link
-                          key={index}
                           to={link.path}
                           className={`relative text-[#0c0e18] lg:text-[16px] md:text-[12px] font-normal transition-all duration-300 hover:text-[#f21d44] before:absolute before:bottom-0 before:left-1/2 before:h-[2px] before:w-0 before:bg-[#f21d44] before:transition-all before:duration-300 before:ease-in-out before:transform before:-translate-x-1/2 hover:before:w-full ${
                             link.routedd === location.pathname

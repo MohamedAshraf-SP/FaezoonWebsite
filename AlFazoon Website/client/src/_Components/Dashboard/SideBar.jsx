@@ -15,12 +15,16 @@ export default function SideBar({
     "Cread",
     "Azkar",
     "Duaa",
+    "Fiqh",
+    "Tawheed",
     "40 Nawawi",
+    "Propht Stories",
+    "Companions Stories",
   ];
 
   return (
     <>
-      <div className="px-2 py-2 flex flex-col items-start justify-start gap-4 border-r border-solid border-slate-200 h-screen ">
+      <div className="px-2 py-2 flex flex-col items-start justify-start gap-4 border-r border-solid border-slate-200 h-screen overflow-y-auto">
         <div className="w-full flex flex-row items-center justify-between">
           <Link to="/" className="w-40 h-10 overflow-hidden">
             <img src={navLogo} alt="navLogo" className="w-full h-full" />
@@ -37,9 +41,8 @@ export default function SideBar({
           {sideBar.map((item, index) => (
             <li
               key={index}
-              className={`tracking-wide cursor-pointer hover:bg-[#EBF0FF] hover:text-[#7586f7] transition-all ease-in-out duration-300 w-full py-2 px-2 rounded-md hover:translate-x-1  ${
-                selectedSection === item ? "bg-[#5D87FF] text-white" : ""
-              }`}
+              className={`tracking-wide cursor-pointer hover:bg-[#EBF0FF] hover:text-[#7586f7] transition-all ease-in-out duration-300 w-full py-2 px-2 rounded-md hover:translate-x-1  ${selectedSection === item ? "bg-[#5D87FF] text-white" : ""
+                }`}
               onClick={() => {
                 onSectionChange(item);
                 ToggleSideBar();
